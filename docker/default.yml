@@ -65,7 +65,7 @@ services:
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:
-      - "80:80"
+      - "8090:80"
     depends_on:
       uwsgi:
         condition: service_healthy
