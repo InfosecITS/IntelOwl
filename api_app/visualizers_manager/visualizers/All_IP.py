@@ -17,31 +17,29 @@ logger = getLogger(__name__)
 
 
 class IPReputationServices(Visualizer):
-    @visualizable_error_handler_with_params("ShodanSearch")
-    def _shodan(self):
+    @visualizable_error_handler_with_params("BinaryEdge")
+    def _binaryedge(self):
         try:
             analyzer_report = self.analyzer_reports().get(
-                config__name="Shodan_Search"
+                config__name="BinaryEdge"
             )
         except AnalyzerReport.DoesNotExist:
-            logger.warning("Shodan_Search report does not exist")
+            logger.warning("BinaryEdge report does not exist")
         else:
             hits = (
-                analyzer_report.report.get("data", {})
-                .get("attributes", {})
-                .get("last_analysis_stats", {})
-                .get("malicious", 0)
+                analyzer_report.report.get("ip_query_report", {})
+                .get("total", 0)
             )
-            virustotal_report = self.Title(
+            binaryedge_report = self.Title(
                 self.Base(
-                    value="ShodanSearch",
+                    value="BinaryEdge",
                     link=analyzer_report.report["link"],
-                    icon=VisualizableIcon.VIRUSTotal,
+                    icon=VisualizableIcon.BinaryEdge,
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
-            return virustotal_report
+            return binaryedge_report
 
     
     @visualizable_error_handler_with_params("VirusTotal")
@@ -406,6 +404,8 @@ class IPReputationServices(Visualizer):
         second_level_elements = []
         third_level_elements = []
         fourth_level_elements = []
+
+        first_level_elements.append(self._binaryedge())
 
         first_level_elements.append(self._vt3())
 
