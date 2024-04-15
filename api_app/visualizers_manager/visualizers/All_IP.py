@@ -33,8 +33,8 @@ class IPReputationServices(Visualizer):
             binaryedge_report = self.Title(
                 self.Base(
                     value="BinaryEdge",
-                    link=analyzer_report.report["link", ""],
-                    icon=VisualizableIcon.INFO
+                    #link=analyzer_report.report["link", ""],
+                    #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
