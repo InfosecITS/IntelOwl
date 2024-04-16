@@ -414,6 +414,9 @@ class IPReputationServices(Visualizer):
             asn_rank = data.get("asn_rank", "")
             asn_position = data.get("asn_position", "")
             asn_description = data.get("asn_description", "")
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or (
+                not asn and not asn_rank not asn_position
+            )
 
             bgp_ranking_report = self.Title(
                 self.Base(
