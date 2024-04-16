@@ -20,9 +20,6 @@ apply_firewall_rules() {
   if [[ $container_ip =~ ^172\.19\. ]]; then
     echo "Applying firewall rules for $from_ip to access $container_ip on port $port"
     
-    # Delete existing rule to prevent duplicates (adjust as necessary to match your rules)
-    sudo ufw delete allow proto tcp from $from_ip to any port $port
-    
     # Add new rule
     sudo ufw route allow proto tcp from $from_ip to $container_ip port $port
   else
