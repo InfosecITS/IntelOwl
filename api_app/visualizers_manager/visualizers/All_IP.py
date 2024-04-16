@@ -17,6 +17,7 @@ logger = getLogger(__name__)
 
 
 class IPReputationServices(Visualizer):
+
     @visualizable_error_handler_with_params("BinaryEdge")
     def _binaryedge(self):
         try:
@@ -40,7 +41,6 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
             return binaryedge_report
-
     
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
@@ -399,6 +399,34 @@ class IPReputationServices(Visualizer):
             )
             return talos_report
 
+    @visualizable_error_handler_with_params("BGP Ranking")
+    def _bgp_ranking(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="BGP_Ranking"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("BGP_Ranking report does not exist")
+        else:
+            
+            data = analyzer_report.report.get("report", {})
+            asn = data.get("asn", "")
+            asn_rank = data.get("asn_rank", "")
+            asn_position = data.get("asn_position", "")
+            asn_description = data.get("asn_description", "")
+
+            bgp_ranking_report = self.Title(
+                self.Base(
+                    value="BGP_Ranking",
+                    #link=analyzer_report.report["link", ""],
+                    icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"ASN: {asn}| Rank: {asn_rank}| Position: {asn_position}| Description: {asn_description}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return bgp_ranking_report
+
+
     def run(self) -> List[Dict]:
         first_level_elements = []
         second_level_elements = []
@@ -439,7 +467,7 @@ class IPReputationServices(Visualizer):
 
         third_level_elements.append(self._talos())
 
-        fourth_level_elements.append(self._talos())
+        fourth_level_elements.append(self._bgp_ranking())
 
         page = self.Page(name="Reputation")
         page.add_level(
@@ -461,6 +489,13 @@ class IPReputationServices(Visualizer):
                 position=3,
                 size=self.LevelSize.S_6,
                 horizontal_list=self.HList(value=third_level_elements),
+            )
+        )
+        page.add_level(
+            self.Level(
+                position=4,
+                size=self.LevelSize.S_5,
+                horizontal_list=self.HList(value=fourth_level_elements),
             )
         )
         logger.debug(f"levels: {page.to_dict()}")
