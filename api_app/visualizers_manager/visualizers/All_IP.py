@@ -422,7 +422,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"ASN: {asn}| Rank: {asn_rank}| Position: {asn_position}| Description: {asn_description}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not asn,
             )
             return bgp_ranking_report
 
@@ -494,7 +494,7 @@ class IPReputationServices(Visualizer):
         page.add_level(
             self.Level(
                 position=4,
-                size=self.LevelSize.S_5,
+                size=self.LevelSize.S_6,
                 horizontal_list=self.HList(value=fourth_level_elements),
             )
         )
