@@ -17,7 +17,7 @@ apply_firewall_rules() {
   local port=$3
 
   # Check if IP is within the expected subnet (optional, for safety)
-  if [[ $container_ip =~ ^172\.19\. ]]; then
+  if [[ $container_ip =~ ^172\ ]]; then
     echo "Applying firewall rules for $from_ip to access $container_ip on port $port"
     
     # Add new rule
