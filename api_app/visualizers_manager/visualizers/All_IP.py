@@ -421,8 +421,8 @@ class IPReputationServices(Visualizer):
                     #link=analyzer_report.report["link", ""],
                     icon=VisualizableIcon.INFO
                 ),
-                self.Base(value=f"ASN: {asn}| Rank: {asn_rank}| Position: {asn_position}| Description: {asn_description}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not asn,
+                self.Base(value="" if disabled else f"ASN: {asn}| Rank: {asn_rank}| Position: {asn_position}| Description: {asn_description}"),
+                disable=disabled,
             )
             return bgp_ranking_report
 
