@@ -8,7 +8,7 @@ external_ips=("128.230.49.121" "129.230.67.26") # Add more IPs as needed
 port="80"
 
 # Fetch the current container IP
-container_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name)
+container_ip=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name)
 
 # Function to apply firewall rules
 apply_firewall_rules() {
