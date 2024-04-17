@@ -436,7 +436,7 @@ class IPReputationServices(Visualizer):
         third_level_elements = []
         fourth_level_elements = []
 
-        first_level_elements.append(self._binaryedge())
+        
 
         first_level_elements.append(self._vt3())
 
@@ -471,6 +471,8 @@ class IPReputationServices(Visualizer):
         third_level_elements.append(self._talos())
 
         fourth_level_elements.append(self._bgp_ranking())
+
+        fourth_level_elements.append(self._binaryedge())
 
         page = self.Page(name="Reputation")
         page.add_level(
