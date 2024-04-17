@@ -18,77 +18,77 @@ logger = getLogger(__name__)
 
 class IPReputationServices(Visualizer):
 
-    @visualizable_error_handler_with_params("Censys_Search")
-    def _censys_search(self):
-        try:
-            analyzer_report = self.analyzer_reports().get(
-                config__name="Censys_Search"
-            )
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("Censys_Search report does not exist")
-        else:
-            hits = (
-                analyzer_report.report.get("ip_query_report", {})
-                .get("total", 0)
-            )
-            Censys_Search_report = self.Title(
-                self.Base(
-                    value="Censys_Search",
-                    #link=analyzer_report.report["link", ""],
-                    #icon=VisualizableIcon.INFO
-                ),
-                self.Base(value=f"Engine Hits: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
-            )
-            return Censys_Search_report
+#@visualizable_error_handler_with_params("Censys_Search")
+ #def _censys_search(self):
+ #    try:
+ #        analyzer_report = self.analyzer_reports().get(
+ #            config__name="Censys_Search"
+ #        )
+ #    except AnalyzerReport.DoesNotExist:
+ #        logger.warning("Censys_Search report does not exist")
+ #    else:
+ #        hits = (
+ #            analyzer_report.report.get("ip_query_report", {})
+ #            .get("total", 0)
+ #        )
+ #        Censys_Search_report = self.Title(
+ #            self.Base(
+ #                value="Censys_Search",
+ #                #link=analyzer_report.report["link", ""],
+ #                #icon=VisualizableIcon.INFO
+ #            ),
+ #            self.Base(value=f"Engine Hits: {hits}"),
+ #            disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+ #        )
+ #        return Censys_Search_report
 
-    @visualizable_error_handler_with_params("BinaryEdge")
-    def _binaryedge(self):
-        try:
-            analyzer_report = self.analyzer_reports().get(
-                config__name="BinaryEdge"
-            )
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("BinaryEdge report does not exist")
-        else:
-            hits = (
-                analyzer_report.report.get("ip_query_report", {})
-                .get("total", 0)
-            )
-            binaryedge_report = self.Title(
-                self.Base(
-                    value="BinaryEdge",
-                    #link=analyzer_report.report["link", ""],
-                    #icon=VisualizableIcon.INFO
-                ),
-                self.Base(value=f"Engine Hits: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
-            )
-            return binaryedge_report
+# #@visualizable_error_handler_with_params("BinaryEdge")
+  #  #def _binaryedge(self):
+ #    try:
+ #        analyzer_report = self.analyzer_reports().get(
+ #            config__name="BinaryEdge"
+ #        )
+ #    except AnalyzerReport.DoesNotExist:
+ #        logger.warning("BinaryEdge report does not exist")
+ #    else:
+ #        hits = (
+ #            analyzer_report.report.get("ip_query_report", {})
+ #            .get("total", 0)
+ #        )
+ #        binaryedge_report = self.Title(
+ #            self.Base(
+ #                value="BinaryEdge",
+ #                #link=analyzer_report.report["link", ""],
+ #                #icon=VisualizableIcon.INFO
+ #            ),
+ #            self.Base(value=f"Engine Hits: {hits}"),
+ #            disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+ #        )
+ #        return binaryedge_report
 
-    @visualizable_error_handler_with_params("BinaryEdge")
-    def _binaryedge(self):
-        try:
-            analyzer_report = self.analyzer_reports().get(
-                config__name="BinaryEdge"
-            )
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("BinaryEdge report does not exist")
-        else:
-            hits = (
-                analyzer_report.report.get("ip_query_report", {})
-                .get("total", 0)
-            )
-            binaryedge_report = self.Title(
-                self.Base(
-                    value="BinaryEdge",
-                    #link=analyzer_report.report["link", ""],
-                    #icon=VisualizableIcon.INFO
-                ),
-                self.Base(value=f"Engine Hits: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
-            )
-            return binaryedge_report
+ #@visualizable_error_handler_with_params("BinaryEdge")
+ #def _binaryedge(self):
+ #    try:
+ #        analyzer_report = self.analyzer_reports().get(
+ #            config__name="BinaryEdge"
+ #        )
+ #    except AnalyzerReport.DoesNotExist:
+ #        logger.warning("BinaryEdge report does not exist")
+ #    else:
+ #        hits = (
+ #            analyzer_report.report.get("ip_query_report", {})
+ #            .get("total", 0)
+ #        )
+ #        binaryedge_report = self.Title(
+ #            self.Base(
+ #                value="BinaryEdge",
+ #                #link=analyzer_report.report["link", ""],
+ #                #icon=VisualizableIcon.INFO
+ #            ),
+ #            self.Base(value=f"Engine Hits: {hits}"),
+ #            disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+ #        )
+ #        return binaryedge_report
     
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
@@ -484,7 +484,7 @@ class IPReputationServices(Visualizer):
         third_level_elements = []
         fourth_level_elements = []
 
-        first_level_elements.append(self._binaryedge())
+        #first_level_elements.append(self._binaryedge())
 
         first_level_elements.append(self._vt3())
 
@@ -518,7 +518,7 @@ class IPReputationServices(Visualizer):
 
         third_level_elements.append(self._talos())
 
-        fourth_level_elements.append(self._bgp_ranking())
+        #fourth_level_elements.append(self._bgp_ranking())
 
         page = self.Page(name="Reputation")
         page.add_level(
