@@ -607,7 +607,7 @@ class IPReputationServices(Visualizer):
 
         fourth_level_elements.append(self._binaryedge())
 
-        fourth_level_elements.append(self._bgp_ranking())
+        #fourth_level_elements.append(self._bgp_ranking())
         
         fourth_level_elements.append(self._pulsedive())
         
