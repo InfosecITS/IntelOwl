@@ -17,6 +17,75 @@ logger = getLogger(__name__)
 
 
 class IPReputationServices(Visualizer):
+    @visualizable_error_handler_with_params("ONYPHE")
+    def _onyphe(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="ONYPHE"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("ONYPHE report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("status",0)
+            )
+            onyphe_report = self.Title(
+                self.Base(
+                    value="ONYPHE",
+                    # link=analyzer_report.report["link", ""]
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Risk Score: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return onyphe_report
+            
+    @visualizable_error_handler_with_params("XForceExchange")
+    def _x_force_exchange(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="XForceExchange"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("XForceExchange report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("ipr",{})
+                .get("score",0)
+            )
+            x_force_exchange_report = self.Title(
+                self.Base(
+                    value="XForceExchange",
+                    # link=analyzer_report.report["link", ""]
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Risk Status: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return x_force_exchange_report
+
+    @visualizable_error_handler_with_params("Pulsedive")
+    def _pulsedive(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="Pulsedive"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Pulsedive report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("risk", 0)
+            )
+            pulsedive_report = self.Title(
+                self.Base(
+                    value="Pulsedive",
+                    #link=analyzer_report.report["link", ""],
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Risk: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return pulsedive_report
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
@@ -431,7 +500,12 @@ class IPReputationServices(Visualizer):
         second_level_elements = []
         third_level_elements = []
         fourth_level_elements = []
+<<<<<<< HEAD
 
+=======
+        # first_level_elements.append(self._pulsedive())
+        first_level_elements.append(self._x_force_exchange())
+>>>>>>> origin/infosec4
         first_level_elements.append(self._vt3())
 
         first_level_elements.append(self._greynoise())
@@ -463,6 +537,12 @@ class IPReputationServices(Visualizer):
         third_level_elements.append(self._tor())
 
         third_level_elements.append(self._talos())
+        
+        fourth_level_elements.append(self._pulsedive())
+        
+        fourth_level_elements.append(self._x_force_exchange())
+        
+        fourth_level_elements.append(self._onyphe())
 
         fourth_level_elements.append(self._binaryedge())
 
