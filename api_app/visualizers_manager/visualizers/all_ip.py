@@ -17,6 +17,29 @@ logger = getLogger(__name__)
 
 
 class IPReputationServices(Visualizer):
+    @visualizable_error_handler_with_params("IPQS_Fraud_And_Risk_Scoring")
+    def _ipqs(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="IPQS_Fraud_And_Risk_Scoring"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("IPQS_Fraud_And_Risk_Scoring report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("fraud_score", 0)
+            )
+            ipqs_report = self.Title(
+                self.Base(
+                    value="IPQS_Fraud_And_Risk_Scoring",
+                    # link=analyzer_report.report["link"],
+                    # icon=VisualizableIcon.VIRUSTotal,
+                ),
+                self.Base(value=f"Fraud Score: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return ipqs_report
+            
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
@@ -378,6 +401,7 @@ class IPReputationServices(Visualizer):
         first_level_elements = []
         second_level_elements = []
         third_level_elements = []
+        fourth_level_elements = []
 
         first_level_elements.append(self._vt3())
 
@@ -411,6 +435,8 @@ class IPReputationServices(Visualizer):
 
         third_level_elements.append(self._talos())
 
+        fourth_level_elements.append(self._ipqs())
+        
         page = self.Page(name="Reputation")
         page.add_level(
             self.Level(
@@ -431,6 +457,13 @@ class IPReputationServices(Visualizer):
                 position=3,
                 size=self.LevelSize.S_6,
                 horizontal_list=self.HList(value=third_level_elements),
+            )
+        )
+        page.add_level(
+            self.Level(
+                position=4,
+                size=self.LevelSize.S_6,
+                horizontal_list=self.HList(value=fourth_level_elements),
             )
         )
         logger.debug(f"levels: {page.to_dict()}")
