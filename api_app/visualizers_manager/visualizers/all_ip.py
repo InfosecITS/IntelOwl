@@ -520,6 +520,52 @@ class IPReputationServices(Visualizer):
             )
             return ipqs_report
 
+    @visualizable_error_handler_with_params("Tor_Nodes_DanMeUk")
+    def _tor_nodes_danmeuk(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="Tor_Nodes_DanMeUk"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Tor_Nodes_DanMeUk report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("found",0)
+            )
+            tor_nodes_danmeuk_report = self.Title(
+                self.Base(
+                    value="Tor_Nodes_DanMeUk",
+                    # link=analyzer_report.report["link", ""]
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Tor Exit Address: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return tor_nodes_danmeuk_report
+
+    @visualizable_error_handler_with_params("TweetFeed")
+    def _tweetfeed(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="TweetFeed"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("TweetFeed report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("found",0)
+            )
+            tweetfeed_report = self.Title(
+                self.Base(
+                    value="TweetFeed",
+                    # link=analyzer_report.report["link", ""]
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Tor Exit Address: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return tweetfeed_report
+
     def run(self) -> List[Dict]:
         first_level_elements = []
         second_level_elements = []
@@ -570,6 +616,10 @@ class IPReputationServices(Visualizer):
         fourth_level_elements.append(self._onyphe())
 
         fifth_level_elements.append(self._ipqs())
+
+        fifth_level_elements.append(self._tweetfeed())
+
+        fifth_level_elements.append(self._tor_nodes_danmeuk())
         
         page = self.Page(name="Reputation")
         page.add_level(
