@@ -500,12 +500,8 @@ class IPReputationServices(Visualizer):
         second_level_elements = []
         third_level_elements = []
         fourth_level_elements = []
-<<<<<<< HEAD
-
-=======
         # first_level_elements.append(self._pulsedive())
         first_level_elements.append(self._x_force_exchange())
->>>>>>> origin/infosec4
         first_level_elements.append(self._vt3())
 
         first_level_elements.append(self._greynoise())
@@ -543,10 +539,6 @@ class IPReputationServices(Visualizer):
         fourth_level_elements.append(self._x_force_exchange())
         
         fourth_level_elements.append(self._onyphe())
-
-        fourth_level_elements.append(self._binaryedge())
-
-        fourth_level_elements.append(self._bgp_ranking())
 
         page = self.Page(name="Reputation")
         page.add_level(
