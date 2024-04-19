@@ -373,11 +373,64 @@ class IPReputationServices(Visualizer):
                 disable=not (analyzer_report.status == ReportStatus.SUCCESS and found),
             )
             return talos_report
+    
+    @visualizable_error_handler_with_params("BinaryEdge")
+    def _binaryedge(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="BinaryEdge"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("BinaryEdge report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("ip_query_report", {})
+                .get("total", 0)
+            )
+            binaryedge_report = self.Title(
+                self.Base(
+                    value="BinaryEdge",
+                    #link=analyzer_report.report["link", ""],
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Engine Hits: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return binaryedge_report
+    @visualizable_error_handler_with_params("BGP Ranking")
+    def _bgp_ranking(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="BGP_Ranking"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("BGP_Ranking report does not exist")
+        else:
+            
+    
+            asn = analyzer_report.report.get("asn", "")
+            asn_rank = analyzer_report.report.get("asn_rank", "")
+            asn_position = analyzer_report.report.get("asn_position", "")
+            asn_description = analyzer_report.report.get("asn_description", "")
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or (
+                not asn and not asn_rank and not asn_position and not asn_description
+            )
+            bgp_ranking_report = self.Title(
+                self.Base(
+                    value="BGP_Ranking",
+                    #link=analyzer_report.report["link", ""],
+                    icon=VisualizableIcon.INFO
+                ),
+                self.Base(value="" if disabled else f"ASN: {asn}| Rank: {asn_rank}| Position: {asn_position}| Description: {asn_description}"),
+                disable=disabled,
+            )
+            return bgp_ranking_report
 
     def run(self) -> List[Dict]:
         first_level_elements = []
         second_level_elements = []
         third_level_elements = []
+        fourth_level_elements = []
 
         first_level_elements.append(self._vt3())
 
@@ -411,6 +464,10 @@ class IPReputationServices(Visualizer):
 
         third_level_elements.append(self._talos())
 
+        fourth_level_elements.append(self._binaryedge())
+
+        fourth_level_elements.append(self._bgp_ranking())
+
         page = self.Page(name="Reputation")
         page.add_level(
             self.Level(
@@ -431,6 +488,13 @@ class IPReputationServices(Visualizer):
                 position=3,
                 size=self.LevelSize.S_6,
                 horizontal_list=self.HList(value=third_level_elements),
+            )
+        )
+        page.add_level(
+            self.Level(
+            position=4,
+            size=self.LevelSize.S_4,
+            horizontal_list=self.HList(value=fourth_level_elements),
             )
         )
         logger.debug(f"levels: {page.to_dict()}")
