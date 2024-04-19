@@ -565,6 +565,46 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
             return tweetfeed_report
+    
+    @visualizable_error_handler_with_params("GoogleSafebrowsing")
+    def _googlesafebrowsing(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="GoogleSafebrowsing"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("GoogleSafebrowsing report does not exist")
+        else:
+            found = analyzer_report.report.get("Found", False)
+            GoogleSafebrowsing_report = self.Title(
+                self.Base(
+                    value="GoogleSafebrowsing",
+                    icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Malicious? : {found}"),
+                disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
+            )
+            return GoogleSafebrowsing_report
+        
+    @visualizable_error_handler_with_params("InQuest_DFI")
+    def _InQuestDFI(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="InQuest_DFI"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("InQuest_DFI report does not exist")
+        else:
+            found = analyzer_report.report.get("Found as Malicious?", False)
+            InQuestDFI_report = self.Title(
+                self.Base(
+                    value="InQuest_DFI",
+                    icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Malicious? : {found}"),
+                disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
+            )
+            return InQuestDFI_report
 
     def run(self) -> List[Dict]:
         first_level_elements = []
@@ -620,6 +660,10 @@ class IPReputationServices(Visualizer):
         fifth_level_elements.append(self._tweetfeed())
 
         fifth_level_elements.append(self._tor_nodes_danmeuk())
+
+        fifth_level_elements.append(self._googlesafebrowsing())
+
+        fifth_level_elements.append(self._InQuestDFI())
         
         page = self.Page(name="Reputation")
         page.add_level(
