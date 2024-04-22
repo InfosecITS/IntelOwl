@@ -53,21 +53,31 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("GreynoiseCommunity report does not exist")
         else:
-            message = analyzer_report.report.get("message", "")
+            message = analyzer_report.report.get("message", None)
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS or message != "Success"
             )
-            
             # noise = analyzer_report.report.get("noise", "")
             # riot = analyzer_report.report.get("riot", "")
             classification = analyzer_report.report.get("classification", "")
+            if classification == "benign":
+                icon = VisualizableIcon.LIKE
+                color = VisualizableColor.SUCCESS
+            elif classification == "malicious":
+                icon = VisualizableIcon.MALWARE
+                color = VisualizableColor.DANGER
+            else:  # should be "unknown"
+                icon = VisualizableIcon.WARNING
+                color = VisualizableColor.INFO
             greynoisecom_report = self.Title(
                 self.Base(
                     value="Greynoise Community",
                     link=analyzer_report.report.get("link", ""),
                     # icon=icon,
                 ),
-                self.Base(value="Not found" if disabled else f"Classification: {classification}"),
+                self.Base(value=analyzer_report.report.get("name", ""), color=color),
+                disable=disabled,
+                #self.Base(value="Not found" if disabled else f"Classification: {classification}"),
                 
             )
             return greynoisecom_report
