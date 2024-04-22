@@ -610,11 +610,11 @@ class IPReputationServices(Visualizer):
             )
             return InQuestDFI_report
         
-    @visualizable_error_handler_with_params("FeodoTracker")
+    @visualizable_error_handler_with_params("Feodo Tracker")
     def _feodotracker(self):
         try:
             analyzer_report = self.analyzer_reports().get(
-                config__name="FeodoTracker"
+                config__name="Feodo_Tracker"
             )
         except AnalyzerReport.DoesNotExist:
             logger.warning("FeodoTracker report does not exist")
@@ -624,11 +624,11 @@ class IPReputationServices(Visualizer):
             )
             FeodoTracker_report = self.Title(
                 self.Base(
-                    value="FeodoTracker",
+                    value="Feodo_Tracker",
                     # link=analyzer_report.report["link"],
                     # icon=VisualizableIcon.INFO,
                 ),
-                self.Base(value=f"Malicious? {hits}"),
+                self.Base(value=f"Malicious: {hits}"),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
             return FeodoTracker_report
