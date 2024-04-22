@@ -44,8 +44,8 @@ class IPReputationServices(Visualizer):
             )
             return virustotal_report
 
-    @visualizable_error_handler_with_params("Greynoise")
-    def _greynoise(self):
+    @visualizable_error_handler_with_params("GreynoiseCommunity")
+    def _greynoisecom(self):
         try:
             analyzer_report = self.analyzer_reports().get(
                 config__name="GreyNoiseCommunity"
@@ -53,30 +53,24 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("GreynoiseCommunity report does not exist")
         else:
-            message = analyzer_report.report.get("message", None)
+            message = analyzer_report.report.get("message", "")
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS or message != "Success"
             )
+            
+            # noise = analyzer_report.report.get("noise", "")
+            # riot = analyzer_report.report.get("riot", "")
             classification = analyzer_report.report.get("classification", "")
-            if classification == "benign":
-                icon = VisualizableIcon.LIKE
-                color = VisualizableColor.SUCCESS
-            elif classification == "malicious":
-                icon = VisualizableIcon.MALWARE
-                color = VisualizableColor.DANGER
-            else:  # should be "unknown"
-                icon = VisualizableIcon.WARNING
-                color = VisualizableColor.INFO
-            greynoise_report = self.Title(
+            greynoisecom_report = self.Title(
                 self.Base(
-                    value="Greynoise",
+                    value="Greynoise Community",
                     link=analyzer_report.report.get("link", ""),
-                    icon=icon,
+                    # icon=icon,
                 ),
-                self.Base(value=analyzer_report.report.get("name", ""), color=color),
-                disable=disabled,
+                self.Base(value="Not found" if disabled else f"Classification: {classification}"),
+                
             )
-            return greynoise_report
+            return greynoisecom_report
 
     @visualizable_error_handler_with_params("URLhaus")
     def _urlhaus(self):
@@ -319,31 +313,26 @@ class IPReputationServices(Visualizer):
             )
             return otx_report
 
-    @visualizable_error_handler_with_params("FireHol")
+    @visualizable_error_handler_with_params("FireHol_IPList")
     def _firehol(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="FireHol_IPList")
         except AnalyzerReport.DoesNotExist:
             logger.warning("FireHol_IPList report does not exist")
         else:
-            found_in_lists = []
-            for report, found in analyzer_report.report.items():
-                if found:
-                    found_in_lists.append(report)
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS or not found_in_lists
+            hits = (
+                analyzer_report.report.get("firehol_level1.netset", 0)
             )
-            otx_report = self.VList(
-                name=self.Base(
-                    value="FireHol", icon=VisualizableIcon.FIRE, disable=disabled
+            firehol_report = self.Title(
+                self.Base(
+                    value="FireHol",
+                    # link=analyzer_report.report["link", ""]
+                    #icon=VisualizableIcon.INFO
                 ),
-                value=[self.Base(f, disable=disabled) for f in found_in_lists],
-                start_open=True,
-                max_elements_number=5,
-                report=analyzer_report,
-                disable=disabled,
+                self.Base(value=f"Tor Exit Address Found: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
-            return otx_report
+            return firehol_report
 
     @visualizable_error_handler_with_params("Tor Exit Node")
     def _tor(self):
@@ -632,7 +621,29 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
             return FeodoTracker_report
-        
+            
+    @visualizable_error_handler_with_params("HybridAnalysis_Get_Observable")
+    def _hybrid_analysis(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="HybridAnalysis_Get_Observable"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("HybridAnalysis_Get_Observable report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("count",0)
+            )
+            hybrid_analyses_report = self.Title(
+                self.Base(
+                    value="HybridAnalysis_Get_Observable",
+                    # link=analyzer_report.report["link", ""]
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Tor Exit Address Found: {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return hybrid_analyses_report        
     
 
     def run(self) -> List[Dict]:
@@ -645,7 +656,7 @@ class IPReputationServices(Visualizer):
         
         first_level_elements.append(self._vt3())
 
-        first_level_elements.append(self._greynoise())
+        first_level_elements.append(self._greynoisecom())
 
         first_level_elements.append(self._urlhaus())
 
@@ -696,6 +707,8 @@ class IPReputationServices(Visualizer):
         fifth_level_elements.append(self._InQuestDFI())
 
         sixth_level_elements.append(self._feodotracker())
+
+        sixth_level_elements.append(self._hybrid_analysis())
         
         page = self.Page(name="Reputation")
         page.add_level(
