@@ -643,7 +643,27 @@ class IPReputationServices(Visualizer):
                 self.Base(value=f"Tor Exit Address Found: {hits}"),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
-            return hybrid_analyses_report        
+            return hybrid_analyses_report
+
+    @visualizable_error_handler_with_params("InQuest_IOCdb")
+    def _inquest_iocdb(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="InQuest_IOCdb"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("InQuest_IOCdb report does not exist")
+        else:
+            found = analyzer_report.report.get("success", 0)
+            inquest_iocdb_report = self.Title(
+                self.Base(
+                    value="InQuest_IOCdb",
+                    icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Not Malicious: {found}"),
+                disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
+            )
+            return inquest_iocdb_report    
     
 
     def run(self) -> List[Dict]:
@@ -709,6 +729,8 @@ class IPReputationServices(Visualizer):
         sixth_level_elements.append(self._feodotracker())
 
         sixth_level_elements.append(self._hybrid_analysis())
+
+        sixth_level_elements.append(self._inquest_iocdb())
         
         page = self.Page(name="Reputation")
         page.add_level(
