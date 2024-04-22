@@ -352,10 +352,12 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("TorProject report does not exist")
         else:
-            found = analyzer_report.report.get("found", False)
-            tor_report = self.Bool(
-                value="Tor Exit Node",
-                disable=not (analyzer_report.status == ReportStatus.SUCCESS and found),
+            found = analyzer_report.report.get("found", 0)
+            tor_report = self.Title(self.Base(
+                value="Tor Exit Node",                
+            ),
+            self.Base(value=f"Found as Tor Exit Node: {found}"),
+            disable = analyzer_report.status != ReportStatus.SUCCESS and found,
             )
             return tor_report
 
@@ -368,10 +370,12 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("TalosReputation report does not exist")
         else:
-            found = analyzer_report.report.get("found", False)
-            talos_report = self.Bool(
+            found = analyzer_report.report.get("found", 0)
+            talos_report = self.Title(self.Base(
                 value="Talos Reputation",
-                disable=not (analyzer_report.status == ReportStatus.SUCCESS and found),
+            ),
+            self.Base(value=f"Engine Hits: {found}"),
+            disable = analyzer_report.status != ReportStatus.SUCCESS and found,
             )
             return talos_report
     
@@ -595,16 +599,41 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_DFI report does not exist")
         else:
-            found = analyzer_report.report.get("Found as Malicious?", False)
+            found = analyzer_report.report.get("success", 0)
             InQuestDFI_report = self.Title(
                 self.Base(
                     value="InQuest_DFI",
                     icon=VisualizableIcon.INFO
                 ),
-                self.Base(value=f"Malicious? : {found}"),
+                self.Base(value=f"Not Malicious: {found}"),
                 disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
             )
             return InQuestDFI_report
+        
+    @visualizable_error_handler_with_params("FeodoTracker")
+    def _feodotracker(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="FeodoTracker"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("FeodoTracker report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("found", 0)
+            )
+            FeodoTracker_report = self.Title(
+                self.Base(
+                    value="FeodoTracker",
+                    # link=analyzer_report.report["link"],
+                    # icon=VisualizableIcon.INFO,
+                ),
+                self.Base(value=f"Malicious? {hits}"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return FeodoTracker_report
+        
+    
 
     def run(self) -> List[Dict]:
         first_level_elements = []
@@ -612,6 +641,7 @@ class IPReputationServices(Visualizer):
         third_level_elements = []
         fourth_level_elements = []
         fifth_level_elements = []
+        sixth_level_elements = []
         
         first_level_elements.append(self._vt3())
 
@@ -664,6 +694,8 @@ class IPReputationServices(Visualizer):
         fifth_level_elements.append(self._googlesafebrowsing())
 
         fifth_level_elements.append(self._InQuestDFI())
+
+        sixth_level_elements.append(self._feodotracker())
         
         page = self.Page(name="Reputation")
         page.add_level(
@@ -697,6 +729,13 @@ class IPReputationServices(Visualizer):
         page.add_level(
             self.Level(
                 position=5,
+                size=self.LevelSize.S_4,
+                horizontal_list=self.HList(value=fifth_level_elements),
+            )
+        )
+        page.add_level(
+            self.Level(
+                position=6,
                 size=self.LevelSize.S_4,
                 horizontal_list=self.HList(value=fifth_level_elements),
             )
