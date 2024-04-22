@@ -585,7 +585,7 @@ class IPReputationServices(Visualizer):
                     value="GoogleSafebrowsing",
                     icon=VisualizableIcon.INFO
                 ),
-                self.Base(value=f"Malicious? : {found}"),
+                self.Base(value=f"Malicious: {found}"),
                 disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
             )
             return GoogleSafebrowsing_report
@@ -737,7 +737,7 @@ class IPReputationServices(Visualizer):
             self.Level(
                 position=6,
                 size=self.LevelSize.S_4,
-                horizontal_list=self.HList(value=fifth_level_elements),
+                horizontal_list=self.HList(value=sixth_level_elements),
             )
         )
         logger.debug(f"levels: {page.to_dict()}")
