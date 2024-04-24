@@ -675,6 +675,31 @@ class IPReputationServices(Visualizer):
             )
             return inquest_iocdb_report    
     
+    @visualizable_error_handler_with_params("FileScan_Search")
+    def _filescan_search(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="FileScan_Search"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("FileScan_Search report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("mdcloud", {})
+                .get("detected",0)
+            )
+            filescan_search_report = self.Title(
+                self.Base(
+                    value="FileScan_Search",
+                    #link=analyzer_report.report["link", ""],
+                    #icon=VisualizableIcon.INFO
+                ),
+                self.Base(value=f"Malicious: {hits}/1"),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return filescan_search_report
+    
+    
 
     def run(self) -> List[Dict]:
         first_level_elements = []
@@ -741,6 +766,8 @@ class IPReputationServices(Visualizer):
         sixth_level_elements.append(self._hybrid_analysis())
 
         sixth_level_elements.append(self._inquest_iocdb())
+
+        sixth_level_elements.append(self._filescan_search())
         
         page = self.Page(name="Reputation")
         page.add_level(

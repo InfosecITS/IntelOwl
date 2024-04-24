@@ -13,7 +13,8 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 class FileScanSearch(ObservableAnalyzer):
     """FileScan_Search analyzer"""
 
-    base_url: str = "https://www.filescan.io/api/reports/search"
+    # base_url: str = "https://www.filescan.io/api/reports/search"
+    base_url: str = "https://www.filescan.io/api/reputation/"
     _api_key: str
 
     def run(self):
@@ -21,7 +22,8 @@ class FileScanSearch(ObservableAnalyzer):
         observable_name_base64 = base64.b64encode(
             self.observable_name.encode()
         ).decode()
-        endpoint = "?query={input}"
+        # endpoint = "?query={input}"
+        endpoint = "ip?ioc_value={input}"
         url = f"{self.base_url}/{endpoint.format(input=observable_name_base64)}"
         try:
             response = requests.get(url, headers={"X-Api-Key": self._api_key})
