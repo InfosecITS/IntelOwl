@@ -738,66 +738,69 @@ class IPReputationServices(Visualizer):
         fourth_level_elements = []
         fifth_level_elements = []
         sixth_level_elements = []
-        
-        first_level_elements.append(self._vt3())
+        seventh_level_elements = []
 
-        first_level_elements.append(self._greynoisecom())
-
-        # first_level_elements.append(self._urlhaus())
-
-        first_level_elements.append(self._threatfox())
-
-        first_level_elements.append(self._inquest_repdb())
-
+        # First Level Elements
         abuse_report, abuse_categories_report = self._abuse_ipdb()
-        third_level_elements.append(abuse_report)
-
-        # gb_report = self._greedybear()
+        first_level_elements.append(abuse_report)
 
         crowdsec_classification_report, crowdsec_behaviors_report = self._crowdsec()
-        second_level_elements.append(crowdsec_classification_report)
+        first_level_elements.append(crowdsec_classification_report)
 
-        # second_level_elements.append(gb_report)
+        #Second Level Elements
+        second_level_elements.append(self._firehol())
 
-        second_level_elements.append(abuse_categories_report)
+        second_level_elements.append(self._tor())
 
-        second_level_elements.append(crowdsec_behaviors_report)
+        second_level_elements.append(self._talos())
 
-        second_level_elements.append(self._otxquery())
+        second_level_elements.append(self._tweetfeed())
 
-        third_level_elements.append(self._firehol())
+        second_level_elements.append(self._tor_nodes_danmeuk())
 
-        third_level_elements.append(self._tor())
+        #Third Level Elements
+        third_level_elements.append(self._googlesafebrowsing())
 
-        third_level_elements.append(self._talos())
+        third_level_elements.append(self._inquest_repdb())
+
+        third_level_elements.append(self._InQuestDFI())
+
+        third_level_elements.append(self._inquest_iocdb())
+
+        third_level_elements.append(self._feodotracker())
+
+        #Fourth Level Elements
+        fourth_level_elements.append(self._pulsedive())
+
+        fourth_level_elements.append(self._vt3())
 
         fourth_level_elements.append(self._binaryedge())
 
-        #fourth_level_elements.append(self._bgp_ranking())
-        
-        fourth_level_elements.append(self._pulsedive())
-        
         fourth_level_elements.append(self._x_force_exchange())
-        
-        fourth_level_elements.append(self._onyphe())
+
+        fourth_level_elements.append(self._hybrid_analysis())
+
+        #Fifth Level Elements
+        fifth_level_elements.append(self._onyphe())
 
         fifth_level_elements.append(self._ipqs())
 
-        fifth_level_elements.append(self._tweetfeed())
+        fifth_level_elements.append(self._filescan_search())
 
-        fifth_level_elements.append(self._tor_nodes_danmeuk())
+        fifth_level_elements.append(self._greynoisecom())
 
-        fifth_level_elements.append(self._googlesafebrowsing())
+        fifth_level_elements.append(self._threatfox())
 
-        fifth_level_elements.append(self._InQuestDFI())
+        #Sixth Level Elements
+        sixth_level_elements.append(self._bgp_ranking())
 
-        sixth_level_elements.append(self._feodotracker())
+        #Seventh Level Elements
+        seventh_level_elements.append(abuse_categories_report)
 
-        sixth_level_elements.append(self._hybrid_analysis())
+        seventh_level_elements.append(crowdsec_behaviors_report)
 
-        sixth_level_elements.append(self._inquest_iocdb())
+        seventh_level_elements.append(self._otxquery())
 
-        sixth_level_elements.append(self._filescan_search())
         
         page = self.Page(name="Reputation")
         page.add_level(
@@ -840,6 +843,13 @@ class IPReputationServices(Visualizer):
                 position=6,
                 size=self.LevelSize.S_4,
                 horizontal_list=self.HList(value=sixth_level_elements),
+            )
+        )
+        page.add_level(
+            self.Level(
+                position=7,
+                size=self.LevelSize.S_4,
+                horizontal_list=self.HList(value=seventh_level_elements),
             )
         )
         logger.debug(f"levels: {page.to_dict()}")
