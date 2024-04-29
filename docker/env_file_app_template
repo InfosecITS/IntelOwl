@@ -76,7 +76,7 @@ DEBUG=False
 LDAP_ENABLED=False
 DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=False
-HTTPS_ENABLED=not_enabled
+HTTPS_ENABLED=enabled
 RADIUS_AUTH_ENABLED=False
 # True for public deployment, False for internal deployment
 PUBLIC_DEPLOYMENT=False
