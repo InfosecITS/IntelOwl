@@ -27,12 +27,16 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("VirusTotal_v3_Get_Observable report does not exist")
         else:
+            # message = analyzer_report.get("status")
+            message = analyzer_report.status
+
             hits = (
                 analyzer_report.report.get("data", {})
                 .get("attributes", {})
                 .get("last_analysis_stats", {})
                 .get("malicious", 0)
             )
+
             virustotal_report = self.Title(
                 self.Base(
                     value="VirusTotal",
@@ -40,7 +44,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.VIRUSTotal,
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return virustotal_report
 
@@ -55,7 +59,7 @@ class IPReputationServices(Visualizer):
         else:
             message = analyzer_report.report.get("message", None)
             disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS or message != "Success"
+                analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS"
             )
             # noise = analyzer_report.report.get("noise", "")
             # riot = analyzer_report.report.get("riot", "")
@@ -82,31 +86,33 @@ class IPReputationServices(Visualizer):
             )
             return greynoisecom_report
 
-    @visualizable_error_handler_with_params("URLhaus")
-    def _urlhaus(self):
-        try:
-            analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("URLhaus report does not exist")
-        else:
-            disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS
-                or analyzer_report.report.get("query_status", None) != "ok"
-            )
-            urlhaus_report = self.Title(
-                self.Base(
-                    value="URLhaus",
-                    link=analyzer_report.report.get("urlhaus_reference", ""),
-                    icon=VisualizableIcon.URLHAUS,
-                ),
-                self.Base(
-                    value=""
-                    if disabled
-                    else f'found {analyzer_report.report.get("urlhaus_status", "")}'
-                ),
-                disable=disabled,
-            )
-            return urlhaus_report
+    # @visualizable_error_handler_with_params("URLhaus")
+    # def _urlhaus(self):
+    #     try:
+    #         analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
+    #     except AnalyzerReport.DoesNotExist:
+    #         logger.warning("URLhaus report does not exist")
+    #     else:
+    #         message = analyzer_report.status
+    #         disabled = (
+    #             analyzer_report.status != ReportStatus.SUCCESS
+    #             or analyzer_report.report.get("query_status", None) != "ok"
+    #             or message != "SUCCESS"            
+    #         )
+    #         urlhaus_report = self.Title(
+    #             self.Base(
+    #                 value="URLhaus",
+    #                 link=analyzer_report.report.get("urlhaus_reference", ""),
+    #                 icon=VisualizableIcon.URLHAUS,
+    #             ),
+    #             self.Base(
+    #                 value=""
+    #                 if disabled
+    #                 else f'found {analyzer_report.report.get("urlhaus_status", "")}'
+    #             ),
+    #             disable=disabled,
+    #         )
+    #         return urlhaus_report
 
     @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
@@ -115,9 +121,11 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("Threatfox report does not exist")
         else:
+            messsage = analyzer_report.status
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
+                or message != "SUCCESS"
             )
             data = analyzer_report.report.get("data", [])
             malware_printable = ""
@@ -139,12 +147,14 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_REPdb report does not exist")
         else:
+            message = analyzer_report.status
             success = analyzer_report.report.get("success", False)
             data = analyzer_report.report.get("data", [])
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS
                 or not success
                 or not data
+                or message != "SUCCESS"
             )
             inquest_report = self.Title(
                 self.Base(
@@ -165,6 +175,7 @@ class IPReputationServices(Visualizer):
             logger.warning("AbuseIPDB report does not exist")
             return None, None
         else:
+            message = analyzer_report.status
             data = analyzer_report.report.get("data", [])
             isp = data.get("isp", "")
             usage = data.get("usageType", "")
@@ -188,6 +199,7 @@ class IPReputationServices(Visualizer):
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS
                 or not categories_extracted
+                or message != "SUCCESS"
             )
             abuse_categories_report = self.VList(
                 name=self.Base(
@@ -206,38 +218,38 @@ class IPReputationServices(Visualizer):
 
             return abuse_report, abuse_categories_report
 
-    @visualizable_error_handler_with_params("GreedyBear Honeypots")
-    def _greedybear(self):
-        try:
-            analyzer_report = self.analyzer_reports().get(config__name="GreedyBear")
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("GreedyBear report does not exist")
-        else:
-            found = analyzer_report.report.get("found", False)
-            disabled = analyzer_report.status != ReportStatus.SUCCESS or not found
-            ioc = analyzer_report.report.get("ioc", {})
-            honeypots = []
-            if ioc:
-                honeypots = list(ioc.get("general_honeypot", []))
-                if ioc.get("cowrie"):
-                    honeypots.append("Cowrie")
-                if ioc.get("log4j"):
-                    honeypots.append("Log4Pot")
-            gb_report = self.VList(
-                name=self.Base(
-                    value="GreedyBear Honeypots",
-                    icon=VisualizableIcon.WARNING,
-                    color=VisualizableColor.DANGER,
-                    disable=disabled,
-                ),
-                value=[self.Base(h, disable=disabled) for h in honeypots],
-                start_open=True,
-                max_elements_number=5,
-                report=analyzer_report,
-                disable=disabled,
-                size=VisualizableSize.S_2,
-            )
-            return gb_report
+    # @visualizable_error_handler_with_params("GreedyBear Honeypots")
+    # def _greedybear(self):
+    #     try:
+    #         analyzer_report = self.analyzer_reports().get(config__name="GreedyBear")
+    #     except AnalyzerReport.DoesNotExist:
+    #         logger.warning("GreedyBear report does not exist")
+    #     else:
+    #         found = analyzer_report.report.get("found", False)
+    #         disabled = analyzer_report.status != ReportStatus.SUCCESS or not found
+    #         ioc = analyzer_report.report.get("ioc", {})
+    #         honeypots = []
+    #         if ioc:
+    #             honeypots = list(ioc.get("general_honeypot", []))
+    #             if ioc.get("cowrie"):
+    #                 honeypots.append("Cowrie")
+    #             if ioc.get("log4j"):
+    #                 honeypots.append("Log4Pot")
+    #         gb_report = self.VList(
+    #             name=self.Base(
+    #                 value="GreedyBear Honeypots",
+    #                 icon=VisualizableIcon.WARNING,
+    #                 color=VisualizableColor.DANGER,
+    #                 disable=disabled,
+    #             ),
+    #             value=[self.Base(h, disable=disabled) for h in honeypots],
+    #             start_open=True,
+    #             max_elements_number=5,
+    #             report=analyzer_report,
+    #             disable=disabled,
+    #             size=VisualizableSize.S_2,
+    #         )
+    #         return gb_report
 
     @visualizable_error_handler_with_params(
         "Crowdsec Classifications", "Crowdsec Behaviors"
@@ -249,11 +261,12 @@ class IPReputationServices(Visualizer):
             logger.warning("Crowdsec report does not exist")
             return None, None
         else:
+            message = analyzer_report.status
             classifications = analyzer_report.report.get("classifications", {})
             sub_classifications = classifications.get("classifications", [])
             false_positives = classifications.get("false_positives", [])
             all_class = sub_classifications + false_positives
-            disabled = analyzer_report.status != ReportStatus.SUCCESS or not all_class
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not all_class or message != "SUCCESS"
             crowdsec_classification_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Classifications",
@@ -272,7 +285,7 @@ class IPReputationServices(Visualizer):
             )
 
             behaviors = analyzer_report.report.get("behaviors", [])
-            disabled = analyzer_report.status != ReportStatus.SUCCESS or not behaviors
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not behaviors or message != "SUCCESS"
             crowdsec_behaviors_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Behaviors",
@@ -298,8 +311,9 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("OTXQuery report does not exist")
         else:
+            message = analyzer_report.status
             pulses = analyzer_report.report.get("pulses", [])
-            disabled = analyzer_report.status != ReportStatus.SUCCESS or not pulses
+            disabled = analyzer_report.status != ReportStatus.SUCCESS or not pulses or message != "SUCCESS"
             otx_report = self.VList(
                 name=self.Base(
                     value="OTX Alienvault",
@@ -330,6 +344,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("FireHol_IPList report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("firehol_level1.netset", 0)
             )
@@ -340,23 +355,24 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Tor Exit Address Found: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return firehol_report
 
-    @visualizable_error_handler_with_params("Tor Exit Node")
+    @visualizable_error_handler_with_params("Tor Project")
     def _tor(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="TorProject")
         except AnalyzerReport.DoesNotExist:
             logger.warning("TorProject report does not exist")
         else:
+            message = analyzer_report.status
             found = analyzer_report.report.get("found", 0)
             tor_report = self.Title(self.Base(
                 value="Tor Exit Node",                
             ),
             self.Base(value=f"Found as Tor Exit Node: {found}"),
-            disable = analyzer_report.status != ReportStatus.SUCCESS and found,
+            disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return tor_report
 
@@ -369,12 +385,13 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("TalosReputation report does not exist")
         else:
+            message = analyzer_report.status
             found = analyzer_report.report.get("found", 0)
             talos_report = self.Title(self.Base(
                 value="Talos Reputation",
             ),
             self.Base(value=f"Engine Hits: {found}"),
-            disable = analyzer_report.status != ReportStatus.SUCCESS and found,
+            disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return talos_report
     
@@ -387,6 +404,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("BinaryEdge report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("ip_query_report", {})
                 .get("total", 0)
@@ -398,7 +416,7 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Engine Hits: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return binaryedge_report
         
@@ -411,15 +429,14 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("BGP_Ranking report does not exist")
         else:
-            
-    
+            message = analyzer_report.status
             asn = analyzer_report.report.get("asn", "")
             asn_rank = analyzer_report.report.get("asn_rank", "")
             asn_position = analyzer_report.report.get("asn_position", "")
             asn_description = analyzer_report.report.get("asn_description", "")
             disabled = analyzer_report.status != ReportStatus.SUCCESS or (
                 not asn and not asn_rank and not asn_position and not asn_description
-            )
+            ) or message != "SUCCESS"
             bgp_ranking_report = self.Title(
                 self.Base(
                     value="BGP_Ranking",
@@ -440,6 +457,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("ONYPHE report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("status",0)
             )
@@ -450,7 +468,7 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Risk Score: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return onyphe_report
             
@@ -463,6 +481,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("XForceExchange report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("ipr",{})
                 .get("score",0)
@@ -474,7 +493,8 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Risk Status: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
+
             )
             return x_force_exchange_report
 
@@ -487,6 +507,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("Pulsedive report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("risk", 0)
             )
@@ -497,7 +518,7 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Risk: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return pulsedive_report
     @visualizable_error_handler_with_params("IPQS_Fraud_And_Risk_Scoring")
@@ -509,6 +530,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("IPQS_Fraud_And_Risk_Scoring report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("fraud_score", 0)
             )
@@ -519,7 +541,7 @@ class IPReputationServices(Visualizer):
                     # icon=VisualizableIcon.VIRUSTotal,
                 ),
                 self.Base(value=f"Fraud Score: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return ipqs_report
 
@@ -532,6 +554,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("Tor_Nodes_DanMeUk report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("found",0)
             )
@@ -542,7 +565,7 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Tor Exit Address: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return tor_nodes_danmeuk_report
 
@@ -555,6 +578,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("TweetFeed report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("found",0)
             )
@@ -565,7 +589,7 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Tor Exit Address: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return tweetfeed_report
     
@@ -578,6 +602,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("GoogleSafebrowsing report does not exist")
         else:
+            message = analyzer_report.status 
             found = analyzer_report.report.get("Found", False)
             GoogleSafebrowsing_report = self.Title(
                 self.Base(
@@ -585,7 +610,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Malicious: {found}"),
-                disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
+                disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return GoogleSafebrowsing_report
         
@@ -598,6 +623,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_DFI report does not exist")
         else:
+            message = analyzer_report.status
             found = analyzer_report.report.get("success", 0)
             InQuestDFI_report = self.Title(
                 self.Base(
@@ -605,7 +631,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Not Malicious: {found}"),
-                disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
+                disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return InQuestDFI_report
         
@@ -618,6 +644,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("FeodoTracker report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("found", 0)
             )
@@ -628,7 +655,7 @@ class IPReputationServices(Visualizer):
                     # icon=VisualizableIcon.INFO,
                 ),
                 self.Base(value=f"Malicious: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return FeodoTracker_report
             
@@ -641,6 +668,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("HybridAnalysis_Get_Observable report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("count",0)
             )
@@ -651,7 +679,7 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Tor Exit Address Found: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return hybrid_analyses_report
 
@@ -664,6 +692,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_IOCdb report does not exist")
         else:
+            message = analyzer_report.status
             found = analyzer_report.report.get("success", 0)
             inquest_iocdb_report = self.Title(
                 self.Base(
@@ -671,7 +700,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Not Malicious: {found}"),
-                disable = analyzer_report.status != ReportStatus.SUCCESS or not found,
+                disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return inquest_iocdb_report    
     
@@ -684,6 +713,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("FileScan_Search report does not exist")
         else:
+            message = analyzer_report.status
             hits = (
                 analyzer_report.report.get("mdcloud", {})
                 .get("detected",0)
@@ -695,7 +725,7 @@ class IPReputationServices(Visualizer):
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Malicious: {hits}/1"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return filescan_search_report
     
@@ -713,7 +743,7 @@ class IPReputationServices(Visualizer):
 
         first_level_elements.append(self._greynoisecom())
 
-        first_level_elements.append(self._urlhaus())
+        # first_level_elements.append(self._urlhaus())
 
         first_level_elements.append(self._threatfox())
 
@@ -722,12 +752,12 @@ class IPReputationServices(Visualizer):
         abuse_report, abuse_categories_report = self._abuse_ipdb()
         third_level_elements.append(abuse_report)
 
-        gb_report = self._greedybear()
+        # gb_report = self._greedybear()
 
         crowdsec_classification_report, crowdsec_behaviors_report = self._crowdsec()
         second_level_elements.append(crowdsec_classification_report)
 
-        second_level_elements.append(gb_report)
+        # second_level_elements.append(gb_report)
 
         second_level_elements.append(abuse_categories_report)
 
