@@ -121,7 +121,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("Threatfox report does not exist")
         else:
-            messsage = analyzer_report.status
+            message = analyzer_report.status
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS
                 or analyzer_report.report.get("query_status", None) != "ok"
