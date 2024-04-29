@@ -124,18 +124,18 @@ class IPReputationServices(Visualizer):
             message = analyzer_report.status
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS
-                or analyzer_report.report.get("query_status", None) != "ok"
+                or analyzer_report.report.get("query_status", "") != "ok"
                 or message != "SUCCESS"
             )
             data = analyzer_report.report.get("data", [])
-            malware_printable = ""
+            confidence_level = ""
             if data and isinstance(data, list):
-                malware_printable = data[0].get("malware_printable", "")
+                confidence_level = data[0].get("confidence_level", 0)
             threatfox_report = self.Title(
                 self.Base(
                     value="ThreatFox", link=analyzer_report.report.get("link", "")
                 ),
-                self.Base(value="" if disabled else f"found {malware_printable}"),
+                self.Base(value="" if disabled else f"Confidence level of malware is: {confidence_level}/100"),
                 disable=disabled,
             )
             return threatfox_report
@@ -727,8 +727,7 @@ class IPReputationServices(Visualizer):
                 self.Base(value=f"Malicious: {hits}/1"),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
-            return filescan_search_report
-    
+            return filescan_search_report    
     
 
     def run(self) -> List[Dict]:
