@@ -128,33 +128,35 @@ class IPReputationServices(Visualizer):
                 or message != "SUCCESS"
             )
             data = analyzer_report.report.get("data", [])
-            confidence_level = ""
+            link = ""
+            confidence_level = "Not Found"
             if data and isinstance(data, list):
                 confidence_level = data[0].get("confidence_level", 0)
+                ioc_id = data[0].get("id", "")
+                link=(f"https://threatfox.abuse.ch/ioc/{ioc_id}")
             threatfox_report = self.Title(
                 self.Base(
-                    value="ThreatFox", link=analyzer_report.report.get("link", "")
+                    value="ThreatFox", link=link
                 ),
                 self.Base(value="" if disabled else f"Confidence level of malware is: {confidence_level}/100"),
-                disable=disabled,
+                disable = disabled,
+
             )
             return threatfox_report
 
-    @visualizable_error_handler_with_params("InQuest")
+    @visualizable_error_handler_with_params("InQuest_REPdb")
     def _inquest_repdb(self):
         try:
             analyzer_report = self.analyzer_reports().get(config__name="InQuest_REPdb")
         except AnalyzerReport.DoesNotExist:
             logger.warning("InQuest_REPdb report does not exist")
         else:
-            message = analyzer_report.status
             success = analyzer_report.report.get("success", False)
             data = analyzer_report.report.get("data", [])
             disabled = (
                 analyzer_report.status != ReportStatus.SUCCESS
                 or not success
                 or not data
-                or message != "SUCCESS"
             )
             inquest_report = self.Title(
                 self.Base(
@@ -697,6 +699,7 @@ class IPReputationServices(Visualizer):
             inquest_iocdb_report = self.Title(
                 self.Base(
                     value="InQuest_IOCdb",
+                    link=analyzer_report.report.get("link", ""),
                     icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Not Malicious: {found}"),
