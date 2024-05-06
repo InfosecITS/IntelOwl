@@ -7,4 +7,4 @@ services:
       - /usr/local/share/ca-certificates:/usr/local/share/ca-certificates
       - /etc/ssl/private:/etc/ssl/private
     ports:
-      - "8080:443"
+      - "8443:443"
