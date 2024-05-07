@@ -98,7 +98,8 @@ services:
     depends_on:
       uwsgi:
         condition: service_healthy
-      - traefik
+      traefik:
+        condition: service_started
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
