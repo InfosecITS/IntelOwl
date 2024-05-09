@@ -5,7 +5,7 @@ container_name="intelowl_nginx"
 # Define the array of external IPs that need access
 external_ips=("128.230.49.121" "128.230.67.26") # Add more IPs as needed
 # Define the port you want to allow access to
-port="8443"
+port="8080"
 
 # Fetch the current container IP
 container_ip=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name)
