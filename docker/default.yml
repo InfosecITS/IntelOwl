@@ -66,8 +66,8 @@ services:
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:
-      - "80:80"
-      - "443:443"
+      #- "8080:80"
+      - "8443:8443"
     #labels:
      # - "traefik.enable=true"
       #- "traefik.http.routers.nginx.rule=Host(`its-sec-misp.syr.edu`)"
