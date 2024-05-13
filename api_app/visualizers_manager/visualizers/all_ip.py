@@ -13,6 +13,10 @@ from api_app.visualizers_manager.enums import (
     VisualizableSize,
 )
 
+from api_app.visualizers_manager.visualizers.apiKeys import (
+    binary_edge_api
+)
+
 logger = getLogger(__name__)
 
 
@@ -27,7 +31,6 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("VirusTotal_v3_Get_Observable report does not exist")
         else:
-            # message = analyzer_report.get("status")
             message = analyzer_report.status
 
             hits = (
@@ -59,7 +62,7 @@ class IPReputationServices(Visualizer):
         else:
             message = analyzer_report.report.get("message", None)
             disabled = (
-                analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS"
+                analyzer_report.status != ReportStatus.SUCCESS or message != "Success"
             )
             # noise = analyzer_report.report.get("noise", "")
             # riot = analyzer_report.report.get("riot", "")
@@ -73,46 +76,17 @@ class IPReputationServices(Visualizer):
             else:  # should be "unknown"
                 icon = VisualizableIcon.WARNING
                 color = VisualizableColor.INFO
+            
             greynoisecom_report = self.Title(
                 self.Base(
                     value="Greynoise Community",
                     link=analyzer_report.report.get("link", ""),
                     # icon=icon,
                 ),
-                self.Base(value=analyzer_report.report.get("name", ""), color=color),
-                disable=disabled,
-                #self.Base(value="Not found" if disabled else f"Classification: {classification}"),
-                
+                self.Base(value=analyzer_report.report.get("classification", ""), color=color),
+                disable=disabled,   
             )
             return greynoisecom_report
-
-    # @visualizable_error_handler_with_params("URLhaus")
-    # def _urlhaus(self):
-    #     try:
-    #         analyzer_report = self.analyzer_reports().get(config__name="URLhaus")
-    #     except AnalyzerReport.DoesNotExist:
-    #         logger.warning("URLhaus report does not exist")
-    #     else:
-    #         message = analyzer_report.status
-    #         disabled = (
-    #             analyzer_report.status != ReportStatus.SUCCESS
-    #             or analyzer_report.report.get("query_status", None) != "ok"
-    #             or message != "SUCCESS"            
-    #         )
-    #         urlhaus_report = self.Title(
-    #             self.Base(
-    #                 value="URLhaus",
-    #                 link=analyzer_report.report.get("urlhaus_reference", ""),
-    #                 icon=VisualizableIcon.URLHAUS,
-    #             ),
-    #             self.Base(
-    #                 value=""
-    #                 if disabled
-    #                 else f'found {analyzer_report.report.get("urlhaus_status", "")}'
-    #             ),
-    #             disable=disabled,
-    #         )
-    #         return urlhaus_report
 
     @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
@@ -220,39 +194,6 @@ class IPReputationServices(Visualizer):
 
             return abuse_report, abuse_categories_report
 
-    # @visualizable_error_handler_with_params("GreedyBear Honeypots")
-    # def _greedybear(self):
-    #     try:
-    #         analyzer_report = self.analyzer_reports().get(config__name="GreedyBear")
-    #     except AnalyzerReport.DoesNotExist:
-    #         logger.warning("GreedyBear report does not exist")
-    #     else:
-    #         found = analyzer_report.report.get("found", False)
-    #         disabled = analyzer_report.status != ReportStatus.SUCCESS or not found
-    #         ioc = analyzer_report.report.get("ioc", {})
-    #         honeypots = []
-    #         if ioc:
-    #             honeypots = list(ioc.get("general_honeypot", []))
-    #             if ioc.get("cowrie"):
-    #                 honeypots.append("Cowrie")
-    #             if ioc.get("log4j"):
-    #                 honeypots.append("Log4Pot")
-    #         gb_report = self.VList(
-    #             name=self.Base(
-    #                 value="GreedyBear Honeypots",
-    #                 icon=VisualizableIcon.WARNING,
-    #                 color=VisualizableColor.DANGER,
-    #                 disable=disabled,
-    #             ),
-    #             value=[self.Base(h, disable=disabled) for h in honeypots],
-    #             start_open=True,
-    #             max_elements_number=5,
-    #             report=analyzer_report,
-    #             disable=disabled,
-    #             size=VisualizableSize.S_2,
-    #         )
-    #         return gb_report
-
     @visualizable_error_handler_with_params(
         "Crowdsec Classifications", "Crowdsec Behaviors"
     )
@@ -275,6 +216,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.INFO,
                     color=VisualizableColor.INFO,
                     disable=disabled,
+                    
                 ),
                 value=[
                     self.Base(c.get("label", ""), disable=disabled) for c in all_class
@@ -294,6 +236,7 @@ class IPReputationServices(Visualizer):
                     icon=VisualizableIcon.ALARM,
                     color=VisualizableColor.DANGER,
                     disable=disabled,
+                    link = analyzer_report.report.get("link", ""),
                 ),
                 value=[
                     self.Base(b.get("label", ""), disable=disabled) for b in behaviors
@@ -411,9 +354,15 @@ class IPReputationServices(Visualizer):
                 analyzer_report.report.get("ip_query_report", {})
                 .get("total", 0)
             )
+            # ip_binary = analyzer_report.report.get("ip_query_report", {}).get("query", "")
+            # ip_binary = ip_binary[3:]
+            # api_key = binary_edge_api
+            # link_binary = f"https://api.binaryedge.io/v2/query/ip/{ip_binary} -H X-Key:{api_key}"
+            # https://api.binaryedge.io/v2/query/ip/xxx.xxx.xxx.xxx
             binaryedge_report = self.Title(
                 self.Base(
                     value="BinaryEdge",
+                    # link = link_binary,
                     #link=analyzer_report.report["link", ""],
                     #icon=VisualizableIcon.INFO
                 ),
@@ -439,13 +388,19 @@ class IPReputationServices(Visualizer):
             disabled = analyzer_report.status != ReportStatus.SUCCESS or (
                 not asn and not asn_rank and not asn_position and not asn_description
             ) or message != "SUCCESS"
+            
+            # ip_bgp = analyzer_report["observable_name"]
+            # ip_bgp = type(analyzer_report)
+            # link_bgp = f"https://bgpranking-ng.circl.lu/ipasn_history/?ip={ip_bgp}/24"
+            # curl https://bgpranking-ng.circl.lu/ipasn_history/?ip=143.255.153.0/24
             bgp_ranking_report = self.Title(
                 self.Base(
                     value="BGP_Ranking",
+                    # link = link_bgp,
                     #link=analyzer_report.report["link", ""],
-                    icon=VisualizableIcon.INFO
+                    # icon=VisualizableIcon.INFO
                 ),
-                self.Base(value="" if disabled else f"ASN: {asn}| Rank: {asn_rank}| Position: {asn_position}| Description: {asn_description}"),
+                self.Base(value="" if disabled else f"ASN: {asn}| Rank: {asn_rank}| Position: {asn_position}| Description: {asn_description} "),
                 disable=disabled,
             )
             return bgp_ranking_report
@@ -491,12 +446,11 @@ class IPReputationServices(Visualizer):
             x_force_exchange_report = self.Title(
                 self.Base(
                     value="XForceExchange",
-                    # link=analyzer_report.report["link", ""]
+                    link=analyzer_report.report.get("ipr",{}).get("link",""),
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Risk Status: {hits}"),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
-
             )
             return x_force_exchange_report
 
@@ -587,6 +541,7 @@ class IPReputationServices(Visualizer):
             tweetfeed_report = self.Title(
                 self.Base(
                     value="TweetFeed",
+                    
                     # link=analyzer_report.report["link", ""]
                     #icon=VisualizableIcon.INFO
                 ),
@@ -674,9 +629,14 @@ class IPReputationServices(Visualizer):
             hits = (
                 analyzer_report.report.get("count",0)
             )
+            # sha_hybrid = analyzer_report.report.get("result",{}).get("sha256","")
+            # link_hybrid = f"https://www.hybrid-analysis.com/api/v2/overview/{sha_hybrid}"
+            # https://www.hybrid-analysis.com/api/v2/overview/e93f8d463bb6b2afdb86e2adf6e23fb93dc59be59b2873ecf5c6c4c578df9441
+
             hybrid_analyses_report = self.Title(
                 self.Base(
                     value="HybridAnalysis_Get_Observable",
+                    # link = link_hybrid,
                     # link=analyzer_report.report["link", ""]
                     #icon=VisualizableIcon.INFO
                 ),
@@ -721,10 +681,13 @@ class IPReputationServices(Visualizer):
                 analyzer_report.report.get("mdcloud", {})
                 .get("detected",0)
             )
+            ip_filescan = analyzer_report.report.get("ioc_value", "")
+            link_filescan =  (f"https://www.filescan.io/api/reputation/ip?ioc_value={ip_filescan}" )
             filescan_search_report = self.Title(
                 self.Base(
                     value="FileScan_Search",
                     #link=analyzer_report.report["link", ""],
+                    link = link_filescan,
                     #icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Malicious: {hits}/1"),
