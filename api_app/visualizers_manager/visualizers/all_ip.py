@@ -21,7 +21,26 @@ logger = getLogger(__name__)
 
 
 class IPReputationServices(Visualizer):
-       
+
+    #to get the IP address
+    @visualizable_error_handler_with_params("FileScan_Search")
+    def get_ip(self):
+        try:
+            self.analyzer_report = self.analyzer_reports().get(
+                config__name="FileScan_Search"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("FileScan_Search report does not exist")
+        else:
+            message = self.analyzer_report.status
+            self.hits = (
+                self.analyzer_report.report.get("mdcloud", {})
+                .get("detected", 0)
+            )
+            self.ip_filescan = self.analyzer_report.report.get("ioc_value", "")
+
+        return self.ip_filescan
+
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
@@ -132,6 +151,9 @@ class IPReputationServices(Visualizer):
                 or not success
                 or not data
             )
+            ip_rep = self.get_ip()
+            link_rep = f"https://labs.inquest.net/api/repdb/search?keyword={ip_rep}&filter_by="
+            # "https://labs.inquest.net/api/repdb/search?keyword=85.114.96.11&filter_by="
             inquest_report = self.Title(
                 self.Base(
                     value="InQuest",
@@ -313,8 +335,10 @@ class IPReputationServices(Visualizer):
         else:
             message = analyzer_report.status
             found = analyzer_report.report.get("found", 0)
+            link_tor = f"https://check.torproject.org/torbulkexitlist"
             tor_report = self.Title(self.Base(
-                value="Tor Exit Node",                
+                value="Tor Exit Node",   
+                link = link_tor             
             ),
             self.Base(value=f"Found as Tor Exit Node: {found}"),
             disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
@@ -357,12 +381,13 @@ class IPReputationServices(Visualizer):
             # ip_binary = analyzer_report.report.get("ip_query_report", {}).get("query", "")
             # ip_binary = ip_binary[3:]
             # api_key = binary_edge_api
-            # link_binary = f"https://api.binaryedge.io/v2/query/ip/{ip_binary} -H X-Key:{api_key}"
-            # https://api.binaryedge.io/v2/query/ip/xxx.xxx.xxx.xxx
+            ip_binary = self.get_ip()
+            link_binary = f"https://api.binaryedge.io/v2/query/ip/{ip_binary} -H 'X-Key:287accb0-c899-43b3-810a-16ab85b5b987'"
+            # curl 'https://api.binaryedge.io/v2/<endpoint>' -H 'X-Key:API_KEY'
             binaryedge_report = self.Title(
                 self.Base(
                     value="BinaryEdge",
-                    # link = link_binary,
+                    link = link_binary,
                     #link=analyzer_report.report["link", ""],
                     #icon=VisualizableIcon.INFO
                 ),
@@ -389,14 +414,13 @@ class IPReputationServices(Visualizer):
                 not asn and not asn_rank and not asn_position and not asn_description
             ) or message != "SUCCESS"
             
-            # ip_bgp = analyzer_report["observable_name"]
-            # ip_bgp = type(analyzer_report)
-            # link_bgp = f"https://bgpranking-ng.circl.lu/ipasn_history/?ip={ip_bgp}/24"
+            ip = self.get_ip()
+            link_bgp = f"https://bgpranking.circl.lu/ipasn_history/?ip={ip}/24"
             # curl https://bgpranking-ng.circl.lu/ipasn_history/?ip=143.255.153.0/24
             bgp_ranking_report = self.Title(
                 self.Base(
                     value="BGP_Ranking",
-                    # link = link_bgp,
+                    link = link_bgp,
                     #link=analyzer_report.report["link", ""],
                     # icon=VisualizableIcon.INFO
                 ),
@@ -405,29 +429,29 @@ class IPReputationServices(Visualizer):
             )
             return bgp_ranking_report
         
-    @visualizable_error_handler_with_params("ONYPHE")
-    def _onyphe(self):
-        try:
-            analyzer_report = self.analyzer_reports().get(
-                config__name="ONYPHE"
-            )
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("ONYPHE report does not exist")
-        else:
-            message = analyzer_report.status
-            hits = (
-                analyzer_report.report.get("status",0)
-            )
-            onyphe_report = self.Title(
-                self.Base(
-                    value="ONYPHE",
-                    # link=analyzer_report.report["link", ""]
-                    #icon=VisualizableIcon.INFO
-                ),
-                self.Base(value=f"Risk Score: {hits}"),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
-            )
-            return onyphe_report
+    # @visualizable_error_handler_with_params("ONYPHE")
+    # def _onyphe(self):
+    #     try:
+    #         analyzer_report = self.analyzer_reports().get(
+    #             config__name="ONYPHE"
+    #         )
+    #     except AnalyzerReport.DoesNotExist:
+    #         logger.warning("ONYPHE report does not exist")
+    #     else:
+    #         message = analyzer_report.status
+    #         hits = (
+    #             analyzer_report.report.get("status",0)
+    #         )
+    #         onyphe_report = self.Title(
+    #             self.Base(
+    #                 value="ONYPHE",
+    #                 # link=analyzer_report.report["link", ""]
+    #                 #icon=VisualizableIcon.INFO
+    #             ),
+    #             self.Base(value=f"Risk Score: {hits}"),
+    #             disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
+    #         )
+    #         return onyphe_report
             
     @visualizable_error_handler_with_params("XForceExchange")
     def _x_force_exchange(self):
@@ -514,9 +538,13 @@ class IPReputationServices(Visualizer):
             hits = (
                 analyzer_report.report.get("found",0)
             )
+            ip_tor_dan = self.get_ip()
+            link_tor = f"https://www.dan.me.uk/ipinfo?ip={ip_tor_dan}"
+            # https://www.dan.me.uk/ipinfo?ip=128.230.49.34
             tor_nodes_danmeuk_report = self.Title(
                 self.Base(
                     value="Tor_Nodes_DanMeUk",
+                    link = link_tor,
                     # link=analyzer_report.report["link", ""]
                     #icon=VisualizableIcon.INFO
                 ),
@@ -582,10 +610,14 @@ class IPReputationServices(Visualizer):
         else:
             message = analyzer_report.status
             found = analyzer_report.report.get("success", 0)
+            ip_dfi = self.get_ip()
+            link_dfi = f"https://labs.inquest.net/api/dfi/search/ext/ext_code?ml_only=false&av_only=false&keyword={ip_dfi}"
+            # "https://labs.inquest.net/api/dfi/search/ext/ext_code?ml_only=false&av_only=false&keyword=182.134.239.97"
             InQuestDFI_report = self.Title(
                 self.Base(
                     value="InQuest_DFI",
-                    icon=VisualizableIcon.INFO
+                    icon=VisualizableIcon.INFO,
+                    link = link_dfi,
                 ),
                 self.Base(value=f"Not Malicious: {found}"),
                 disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
@@ -605,9 +637,12 @@ class IPReputationServices(Visualizer):
             hits = (
                 analyzer_report.report.get("found", 0)
             )
+            ip_feodo = self.get_ip()
+            link_feodo = f"https://feodotracker.abuse.ch/browse.php?search={ip_feodo}"
             FeodoTracker_report = self.Title(
                 self.Base(
                     value="Feodo_Tracker",
+                    link = link_feodo,
                     # link=analyzer_report.report["link"],
                     # icon=VisualizableIcon.INFO,
                 ),
@@ -629,14 +664,15 @@ class IPReputationServices(Visualizer):
             hits = (
                 analyzer_report.report.get("count",0)
             )
-            # sha_hybrid = analyzer_report.report.get("result",{}).get("sha256","")
-            # link_hybrid = f"https://www.hybrid-analysis.com/api/v2/overview/{sha_hybrid}"
+            sha_hybrid = analyzer_report.report.get("result",{})
+            sha_hybrid = sha_hybrid[0]["sha256"]
+            # link_hybrid = f"https://www.hybrid-analysis.com/api/v2/overview/{sha_hybrid} \ -H 'api-key: uxwbea3zfde01fadnv0e9h3990e273cepk4iw2qob6b31882g3jo8zmy005d2277'"
             # https://www.hybrid-analysis.com/api/v2/overview/e93f8d463bb6b2afdb86e2adf6e23fb93dc59be59b2873ecf5c6c4c578df9441
 
             hybrid_analyses_report = self.Title(
                 self.Base(
                     value="HybridAnalysis_Get_Observable",
-                    # link = link_hybrid,
+                    link = link_hybrid,
                     # link=analyzer_report.report["link", ""]
                     #icon=VisualizableIcon.INFO
                 ),
@@ -656,10 +692,14 @@ class IPReputationServices(Visualizer):
         else:
             message = analyzer_report.status
             found = analyzer_report.report.get("success", 0)
+            ip_ioc = self.get_ip()
+            link_ioc = f"https://labs.inquest.net/api/iocdb/search?keyword={ip_ioc}&filter_by="
+            # "https://labs.inquest.net/api/iocdb/search?keyword=43.138.168.21&filter_by="
             inquest_iocdb_report = self.Title(
                 self.Base(
                     value="InQuest_IOCdb",
-                    link=analyzer_report.report.get("link", ""),
+                    link = link_ioc,
+                    # link=analyzer_report.report.get("link", ""),
                     icon=VisualizableIcon.INFO
                 ),
                 self.Base(value=f"Not Malicious: {found}"),
@@ -681,8 +721,9 @@ class IPReputationServices(Visualizer):
                 analyzer_report.report.get("mdcloud", {})
                 .get("detected",0)
             )
-            ip_filescan = analyzer_report.report.get("ioc_value", "")
-            link_filescan =  (f"https://www.filescan.io/api/reputation/ip?ioc_value={ip_filescan}" )
+            # ip_filescan = analyzer_report.report.get("ioc_value", "")
+            ip = self.get_ip()  # Retrieve IP using get_ip method
+            link_filescan =  (f"https://www.filescan.io/api/reputation/ip?ioc_value={ip}" )
             filescan_search_report = self.Title(
                 self.Base(
                     value="FileScan_Search",
@@ -694,7 +735,55 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return filescan_search_report    
-    
+
+    @visualizable_error_handler_with_params("Netlas")
+    def _netlas(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="Netlas"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("Netlas report does not exist")
+        else:
+            message = analyzer_report.status
+            # ip = analyzer_report.report.get("ip", {})
+            asn = analyzer_report.report.get("asn", {})
+            
+            
+            if isinstance(asn, dict):
+                asn_name = asn.get("name", "")
+                asn_country = asn.get("country", "")
+                asn_registry = asn.get("registry", "")
+                ip_netlas = self.get_ip()
+                link_netlas = f"https://app.netlas.io/api/whois_ip/?q={ip_netlas}&source_type=include&start=0&fields=*"
+            else:
+                asn_name = "Not Found"
+                asn_country = "Not Found"
+                asn_registry = "Not Found"
+ 
+            # if ip and isinstance(ip, dict):
+            #     ipadd = analyzer_report.report.get("ip", {}).get("gte", "")
+            #     link = f"https://app.netlas.io/api/whois_ip/?q={ipadd}&source_type=include&start=0&fields=*"
+            # else:
+            #     ipadd = ""
+            #     link = ""
+
+
+ 
+            netlas_report = self.Title(
+                self.Base(
+                    value="Netlas",
+                    link=link_netlas,
+                ),
+                self.Base(
+                    value=f"Details: {asn_name} | Country: {asn_country} | Registry: {asn_registry}"
+                ),
+                disable=(
+                    analyzer_report.status != ReportStatus.SUCCESS
+                    or message != "SUCCESS"
+                ),
+            )
+            return netlas_report
 
     def run(self) -> List[Dict]:
         first_level_elements = []
@@ -746,7 +835,7 @@ class IPReputationServices(Visualizer):
         fourth_level_elements.append(self._hybrid_analysis())
 
         #Fifth Level Elements
-        fifth_level_elements.append(self._onyphe())
+        # fifth_level_elements.append(self._onyphe())
 
         fifth_level_elements.append(self._ipqs())
 
@@ -755,6 +844,8 @@ class IPReputationServices(Visualizer):
         fifth_level_elements.append(self._greynoisecom())
 
         fifth_level_elements.append(self._threatfox())
+
+        fifth_level_elements.append(self._netlas())
 
         #Sixth Level Elements
         sixth_level_elements.append(self._bgp_ranking())
