@@ -76,7 +76,7 @@ services:
       #- "traefik.http.routers.nginx.entrypoints=websecure"
       #- "traefik.http.routers.nginx.tls.certresolver=myresolver"
     depends_on:
-      uwsgi:O
+      uwsgi:
         condition: service_healthy
      # traefik:
      #   condition: service_started
