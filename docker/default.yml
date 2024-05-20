@@ -103,7 +103,7 @@ services:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_default
     restart: unless-stopped
-    stop_grace_period: 3m
+    stop_grace_period: 1m
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
