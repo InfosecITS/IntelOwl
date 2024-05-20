@@ -68,7 +68,7 @@ services:
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:
-      - "80:80"
+      - "8080:80"
       - "443:443"
     #labels:
      # - "traefik.enable=true"
@@ -76,7 +76,8 @@ services:
       #- "traefik.http.routers.nginx.entrypoints=websecure"
       #- "traefik.http.routers.nginx.tls.certresolver=myresolver"
     depends_on:
-      uwsgi:
+      uwsgi:O
+
         condition: service_healthy
      # traefik:
      #   condition: service_started
