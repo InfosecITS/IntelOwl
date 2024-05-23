@@ -61,7 +61,7 @@ services:
     volumes:
       - ../configuration/nginx/websocket.conf:/etc/nginx/websocket.conf
       - ../configuration/nginx/errors.conf:/etc/nginx/errors.conf
-      - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx/https.conf:/etc/nginx/conf.d/default.conf
       #- /etc/nginx/ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
       #- /etc/nginx/ssl/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
       - ../configuration/nginx/locations.conf:/etc/nginx/locations.conf
