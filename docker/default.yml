@@ -86,7 +86,7 @@ services:
     volumes:
       - /var/www/certbot:/var/www/certbot
       - ../certbot/conf:/etc/letsencrypt
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --deploy-hook \"nginx -s reload\"; sleep 12h & wait $${!}; done;'"
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /var/www/certbot -d its-sec-misp.syr.edu; sleep 12h & wait $${!}; done;'"
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
