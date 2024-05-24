@@ -6,4 +6,4 @@ services:
       - ../configuration/nginx/https.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt/live/its-sec-misp.syr.edu:/etc/letsencrypt/live/its-sec-misp.syr.edu
     ports:
-      - "8443:8443"
+      - "443:443"
