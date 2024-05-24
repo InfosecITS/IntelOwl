@@ -69,7 +69,7 @@ services:
       - static_content:/var/www/static
     ports:
       - "8080:80"
-      - "443:443"
+#      - "443:443"
     #labels:
      # - "traefik.enable=true"
       #- "traefik.http.routers.nginx.rule=Host(`its-sec-misp.syr.edu`)"
