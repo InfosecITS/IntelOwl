@@ -67,7 +67,7 @@ services:
       - static_content:/var/www/static
     ports:
       - "8080:80"
-      - "4443:443"
+      - "8443:443"
     #labels:
      # - "traefik.enable=true"
       #- "traefik.http.routers.nginx.rule=Host(`its-sec-misp.syr.edu`)"
@@ -101,7 +101,7 @@ services:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_default
     restart: unless-stopped
-    stop_grace_period: 3m
+    stop_grace_period: 1m
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
