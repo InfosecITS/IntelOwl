@@ -4,8 +4,8 @@ services:
   nginx:
     volumes:
       - ../configuration/nginx/https.conf:/etc/nginx/conf.d/default.conf
-      - /etc/letsencrypt/live/its-sec-misp.syr.edu:/etc/letsencrypt/live/its-sec-misp.syr.edu
-      - /etc/letsencrypt/archive/its-sec-misp.syr.edu:/etc/letsencrypt/archive/its-sec-misp.syr.edu
+      - /etc/letsencrypt/live/its-sec-misp.syr.edu/:/etc/letsencrypt/live/its-sec-misp.syr.edu/
+      - /etc/letsencrypt/archive/its-sec-misp.syr.edu/:/etc/letsencrypt/archive/its-sec-misp.syr.edu/
 
     ports:
       - "8443:443"
