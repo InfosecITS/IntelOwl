@@ -11,7 +11,7 @@ DB_NAME=intel_owl_db
 # jobs older than this would be flushed from the database periodically. Default: 14 days
 OLD_JOBS_RETENTION_DAYS=14
 # used for generating links to web client e.g. job results page; Default: localhost
-INTELOWL_WEB_CLIENT_DOMAIN=localhost
+INTELOWL_WEB_CLIENT_DOMAIN=its_sec-misp.syr.edu
 # used for automated correspondence from the site manager
 DEFAULT_FROM_EMAIL=
 # used for correspondence with users
