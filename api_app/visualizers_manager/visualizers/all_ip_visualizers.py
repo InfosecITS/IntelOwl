@@ -16,7 +16,7 @@ from api_app.visualizers_manager.enums import (
 logger = getLogger(__name__)
 
 
-class IPReputationServices(Visualizer):
+class ALLIpVisualizers(Visualizer):
     #to get the IP address
     @visualizable_error_handler_with_params("FileScan_Search")
     def get_ip(self):
