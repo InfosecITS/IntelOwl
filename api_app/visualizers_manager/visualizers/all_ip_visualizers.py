@@ -15,8 +15,51 @@ from api_app.visualizers_manager.enums import (
 
 logger = getLogger(__name__)
 
+class IPReputationServices(Visualizer):
+    @visualizable_error_handler_with_params("VirusTotal")
+    def _vt3(self):
+        try:
+            analyzer_report = self.analyzer_reports().get(
+                config__name="VirusTotal_v3_Get_Observable"
+            )
+        except AnalyzerReport.DoesNotExist:
+            logger.warning("VirusTotal_v3_Get_Observable report does not exist")
+        else:
+            hits = (
+                analyzer_report.report.get("data", {})
+                .get("attributes", {})
+                .get("last_analysis_stats", {})
+                .get("malicious", 0)
+            )
 
-class ALLIpVisualizers(Visualizer):
+            output = ""
+            if hits >= 1:
+                output = f"Reported: {hits}"
+            else:
+                output = "Safe"
+
+            #color
+            if hits >= 1:
+                icon = VisualizableIcon.MALWARE
+                color = VisualizableColor.DANGER
+
+            else:
+                icon = VisualizableIcon.LIKE
+                color = VisualizableColor.SUCCESS
+
+            virustotal_report = self.Title(
+                self.Base(
+                    value="VirusTotal",
+                    link=analyzer_report.report["link"],
+                    icon=VisualizableIcon.VIRUSTotal,
+                    color = color,
+                ),
+                self.Base(value= output),
+                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
+            )
+            return virustotal_report
+            
+#class ALLIpVisualizers(Visualizer):
     #to get the IP address
     @visualizable_error_handler_with_params("FileScan_Search")
     def get_ip(self):
@@ -424,48 +467,6 @@ class ALLIpVisualizers(Visualizer):
             )
             return x_force_exchange_report
 
-    @visualizable_error_handler_with_params("VirusTotal")
-    def _vt3(self):
-        try:
-            analyzer_report = self.analyzer_reports().get(
-                config__name="VirusTotal_v3_Get_Observable"
-            )
-        except AnalyzerReport.DoesNotExist:
-            logger.warning("VirusTotal_v3_Get_Observable report does not exist")
-        else:
-            hits = (
-                analyzer_report.report.get("data", {})
-                .get("attributes", {})
-                .get("last_analysis_stats", {})
-                .get("malicious", 0)
-            )
-
-            output = ""
-            if hits >= 1:
-                output = f"Reported: {hits}"
-            else:
-                output = "Safe"
-
-            #color
-            if hits >= 1:
-                icon = VisualizableIcon.MALWARE
-                color = VisualizableColor.DANGER
-
-            else:
-                icon = VisualizableIcon.LIKE
-                color = VisualizableColor.SUCCESS
-
-            virustotal_report = self.Title(
-                self.Base(
-                    value="VirusTotal",
-                    link=analyzer_report.report["link"],
-                    icon=VisualizableIcon.VIRUSTotal,
-                    color = color,
-                ),
-                self.Base(value= output),
-                disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
-            )
-            return virustotal_report
 
     @visualizable_error_handler_with_params("Tor Project")
     def _tor(self):
