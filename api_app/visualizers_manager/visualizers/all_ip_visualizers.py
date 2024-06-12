@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Adjust the Python path to include the root directory of the project
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
 from logging import getLogger
 from typing import Dict, List
 
