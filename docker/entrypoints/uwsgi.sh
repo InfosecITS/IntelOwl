@@ -5,7 +5,7 @@ do
     echo "Waiting for server volume..."
 done
 
-mkdir -p /var/log/intel_owl/django /var/log/intel_owl/uwsgi /var/log/intel_owl/asgi /opt/deploy/intel_owl/files_required/blint /opt/deploy/intel_owl/files_required/yara
+#mkdir -p /var/log/intel_owl/django /var/log/intel_owl/uwsgi /var/log/intel_owl/asgi /opt/deploy/intel_owl/files_required/blint /opt/deploy/intel_owl/files_required/yara
 
 # Apply database migrations
 echo "Waiting for db to be ready..."
