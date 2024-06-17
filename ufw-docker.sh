@@ -16,7 +16,7 @@ delete_firewall_rules() {
   echo "Deleting existing firewall rules for $from_ip accessing $container_ip on port $port"
 
   # Delete existing rule if it exists
-  #sudo ufw route delete proto tcp from $from_ip to $container_ip port $port
+  sudo ufw route delete proto tcp from $from_ip port $port
 }
 
 # Function to apply firewall rules
