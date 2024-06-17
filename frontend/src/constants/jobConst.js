@@ -83,6 +83,8 @@ export const FileMimeTypes = Object.freeze({
   XPKCS7: "application/x-pkcs7-signature",
   MIXED: "multipart/mixed",
   X_SHELLSCRIPT: "text/x-shellscript",
+  CRX: "application/x-chrome-extension",
+  JSON: "application/json",
 });
 
 export const ObservableClassifications = Object.freeze({
@@ -178,7 +180,12 @@ export const FileExtensions = Object.freeze({
   OK: "ok",
   PUBLICVM: "publicvm",
   ISO: "iso",
-  SH: "sh",
+  CRX: "crx",
+  CONFIG: "config",
+  /* This is a list of valid tld that are also file extnesions.
+  This could generate some false positives in the auto-extraction, if they are too much filter them.
+  sh
+  */
 });
 
 export const InvalidTLD = Object.freeze({

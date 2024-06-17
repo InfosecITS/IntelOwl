@@ -49,6 +49,7 @@ function parseComponentType(value) {
       VisualizerComponentType.BOOL,
       VisualizerComponentType.VLIST,
       VisualizerComponentType.HLIST,
+      VisualizerComponentType.TABLE,
     ].includes(value)
   ) {
     return value;
@@ -83,11 +84,32 @@ function parseAlignment(alignment) {
   return "around";
 }
 
+function parseString(value) {
+  const stringValue = value;
+  // avoid to convert 0 to ""
+  if (value === null || value === undefined) return "";
+  // avoid [object Object] for the dict
+  if (typeof value === "object" && !Array.isArray(value))
+    return JSON.stringify(value);
+  return String(stringValue);
+}
+
 // parse list of Elements
 function parseElementList(rawElementList) {
   return rawElementList?.map((additionalElementrawData) =>
     parseElementFields(additionalElementrawData),
   );
+}
+
+// parse list of dict with this format {key: Element}
+function parseElementListOfDict(rawElementList) {
+  return rawElementList?.map((additionalElementrawData) => {
+    const obj = {};
+    Object.entries(additionalElementrawData).forEach(([key, value]) => {
+      obj[key] = parseElementFields(value);
+    });
+    return obj;
+  });
 }
 
 // parse a single element
@@ -103,22 +125,26 @@ function parseElementFields(rawElement) {
   // validation for the elements
   switch (validatedFields.type) {
     case VisualizerComponentType.BOOL: {
-      validatedFields.value = rawElement.value;
-      validatedFields.icon = rawElement.icon;
-      validatedFields.italic = parseBool(rawElement.italic);
-      validatedFields.link = rawElement.link;
+      validatedFields.value = parseString(rawElement.value);
+      validatedFields.icon = parseString(rawElement.icon);
       validatedFields.activeColor = parseColor(rawElement.color, "danger");
-      validatedFields.copyText = rawElement.copy_text || rawElement.value;
-      validatedFields.description = rawElement.description;
+      validatedFields.italic = parseBool(rawElement.italic);
+      validatedFields.link = parseString(rawElement.link);
+      validatedFields.copyText = parseString(
+        rawElement.copy_text || rawElement.value,
+      );
+      validatedFields.description = parseString(rawElement.description);
       break;
     }
     case VisualizerComponentType.HLIST: {
-      validatedFields.values = parseElementList(rawElement.values);
+      validatedFields.values = parseElementList(rawElement.values || []);
       break;
     }
     case VisualizerComponentType.VLIST: {
-      validatedFields.name = parseElementFields(rawElement.name);
-      validatedFields.values = parseElementList(rawElement.values);
+      if (rawElement.name !== null)
+        validatedFields.name = parseElementFields(rawElement.name);
+      else validatedFields.name = rawElement.name;
+      validatedFields.values = parseElementList(rawElement.values || []);
       validatedFields.startOpen = parseBool(rawElement.start_open);
       break;
     }
@@ -127,16 +153,28 @@ function parseElementFields(rawElement) {
       validatedFields.value = parseElementFields(rawElement.value);
       break;
     }
+    case VisualizerComponentType.TABLE: {
+      validatedFields.data = parseElementListOfDict(rawElement.data || []);
+      validatedFields.columns = rawElement.columns.map((column) =>
+        parseString(column),
+      );
+      validatedFields.pageSize = rawElement.page_size;
+      validatedFields.disableFilters = parseBool(rawElement.disable_filters);
+      validatedFields.disableSortBy = parseBool(rawElement.disable_sort_by);
+      break;
+    }
     // base case
     default: {
-      validatedFields.value = rawElement.value;
-      validatedFields.icon = rawElement.icon;
+      validatedFields.value = parseString(rawElement.value);
+      validatedFields.icon = parseString(rawElement.icon);
       validatedFields.color = `bg-${parseColor(rawElement.color)}`;
-      validatedFields.link = rawElement.link;
-      validatedFields.bold = parseBool(rawElement.bold);
       validatedFields.italic = parseBool(rawElement.italic);
-      validatedFields.copyText = rawElement.copy_text || rawElement.value;
-      validatedFields.description = rawElement.description;
+      validatedFields.link = parseString(rawElement.link);
+      validatedFields.bold = parseBool(rawElement.bold);
+      validatedFields.copyText = parseString(
+        rawElement.copy_text || rawElement.value,
+      );
+      validatedFields.description = parseString(rawElement.description);
       break;
     }
   }

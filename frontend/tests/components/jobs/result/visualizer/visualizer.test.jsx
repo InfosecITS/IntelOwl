@@ -3,6 +3,14 @@ import "@testing-library/jest-dom";
 import { render, screen, within } from "@testing-library/react";
 import VisualizerReport from "../../../../../src/components/jobs/result/visualizer/visualizer";
 
+// mock useLocation
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useLocation: () => ({
+    pathname: "localhost/jobs/123/visualizer",
+  }),
+}));
+
 describe("test VisualizerReport (conversion from backend data to frontend components)", () => {
   test("visualizer failed with error", () => {
     render(
@@ -152,6 +160,33 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
                     disable: false,
                     alignment: "center",
                   },
+                  {
+                    type: "table",
+                    size: "auto",
+                    alignment: "start",
+                    columns: ["column_name"],
+                    data: [
+                      {
+                        column_name: {
+                          type: "base",
+                          value: "placeholder",
+                          icon: "it",
+                          color: "success",
+                          link: "https://google.com",
+                          bold: true,
+                          italic: true,
+                          disable: false,
+                          size: "1",
+                          alignment: "start",
+                          copy_text: "placeholder",
+                          description: "description",
+                        },
+                      },
+                    ],
+                    page_size: 5,
+                    disable_filters: true,
+                    disable_sort_by: true,
+                  },
                 ],
                 alignment: "around",
               },
@@ -172,7 +207,7 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
     expect(firstLevelId).toBeInTheDocument();
     const secondLevelId = container.querySelector("#page105-level2");
     expect(secondLevelId).toBeInTheDocument();
-    // check the first line has vlist and title and NOT base and bool
+    // check the first line has vlist, title and table and NOT base and bool
     const vListComponent = within(container.firstChild.firstChild).getByText(
       "vlist title",
     );
@@ -181,6 +216,10 @@ describe("test VisualizerReport (conversion from backend data to frontend compon
       "title title",
     );
     expect(titleComponent).toBeInTheDocument();
+    const tableComponent = within(container.firstChild.firstChild).getByText(
+      "column name",
+    );
+    expect(tableComponent).toBeInTheDocument();
     expect(
       within(container.firstChild.firstChild).queryByText("base component"),
     ).toBeNull();
