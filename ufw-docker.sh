@@ -3,7 +3,7 @@
 # Define the container name
 container_name="intelowl_nginx"
 # Define the array of external IPs that need access
-external_ips=( "128.230.49.121" "128.230.67.26" "128.230.49.195" "128.230.49.124") # Add more IPs as needed
+external_ips=( "128.230.49.121" "128.230.67.26" "128.230.49.195" "128.230.49.124" "128.230.49.244") # Add more IPs as needed
 # Define the port you want to allow access to
 port="443"
 
