@@ -144,7 +144,7 @@ class IPReputationServices(Visualizer):
 
             behaviors = analyzer_report.report.get("behaviors", [])
             disabled = analyzer_report.status != ReportStatus.SUCCESS or not behaviors or message != "SUCCESS"
-
+            
             crowdsec_behaviors_report = self.VList(
                 name=self.Base(
                     value="Crowdsec Behaviors",
@@ -163,7 +163,7 @@ class IPReputationServices(Visualizer):
                 size=VisualizableSize.S_2,
             )
             return crowdsec_classification_report, crowdsec_behaviors_report
-
+    
     @visualizable_error_handler_with_params("OTX Alienvault")
     def _otxquery(self):
         try:
@@ -198,7 +198,7 @@ class IPReputationServices(Visualizer):
                 size=VisualizableSize.S_4,
             )
             return otx_report
-
+    
     @visualizable_error_handler_with_params("BGP Ranking")
     def _bgp_ranking(self):
         try:
@@ -216,7 +216,7 @@ class IPReputationServices(Visualizer):
             disabled = analyzer_report.status != ReportStatus.SUCCESS or (
                 not asn and not asn_rank and not asn_position and not asn_description
             ) or message != "SUCCESS"
-
+            
             ip = self.get_ip()
             link_bgp = f"https://bgpranking.circl.lu/ipasn_history/?ip={ip}/24"
             # curl https://bgpranking-ng.circl.lu/ipasn_history/?ip=143.255.153.0/24
@@ -229,7 +229,7 @@ class IPReputationServices(Visualizer):
                     disable=disabled,
                     link = link_bgp,
                 ),
-
+                
                 value=[
                     self.Base(value="" if disabled else f"ASN: {asn}{nl} Rank: {asn_rank}{nl} Position: {asn_position}{nl} Description: {asn_description} ")
                 ],
@@ -255,7 +255,7 @@ class IPReputationServices(Visualizer):
                 analyzer_report.report.get("ip_query_report", {})
                 .get("total", 0)
             )
-
+    
             ip_binary = self.get_ip()
             link_binary = f"https://api.binaryedge.io/v2/query/ip/{ip_binary} -H 'X-Key:287accb0-c899-43b3-810a-16ab85b5b987'"
             # curl 'https://api.binaryedge.io/v2/<endpoint>' -H 'X-Key:API_KEY'
@@ -274,7 +274,7 @@ class IPReputationServices(Visualizer):
             # else:  # should be "unknown"
             #     icon = VisualizableIcon.SUCCESS
             #     color = VisualizableColor.INFO
-
+            
             binaryedge_report = self.Title(
                 self.Base(
                     value="BinaryEdge",
@@ -313,7 +313,7 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return FeodoTracker_report
-
+    
     @visualizable_error_handler_with_params("FileScan_Search")
     def _filescan_search(self):
         try:
@@ -356,8 +356,8 @@ class IPReputationServices(Visualizer):
                 self.Base(value=output),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
-            return filescan_search_report
-
+            return filescan_search_report 
+    
     @visualizable_error_handler_with_params("XForceExchange")
     def _x_force_exchange(self):
         try:
@@ -379,7 +379,7 @@ class IPReputationServices(Visualizer):
                 output = "Risk: Medium"
             else:
                 output = "Risk: High"
-
+            
             #color
             if hits >= 1 and hits <= 3:
                 icon = VisualizableIcon.LIKE
@@ -390,7 +390,7 @@ class IPReputationServices(Visualizer):
             else:
                 icon = VisualizableIcon.MALWARE
                 color = VisualizableColor.DANGER
-
+            
             disabled = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS"
 
             link_xforce = analyzer_report.report.get("ipr",{}).get("link","")
@@ -411,7 +411,7 @@ class IPReputationServices(Visualizer):
             #     disable=disabled,
             #     size=VisualizableSize.S_2,
             # )
-
+    
             x_force_exchange_report = self.Title(
                 self.Base(
                     value="XForceExchange",
@@ -423,7 +423,7 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return x_force_exchange_report
-
+    
     @visualizable_error_handler_with_params("VirusTotal")
     def _vt3(self):
         try:
@@ -445,12 +445,12 @@ class IPReputationServices(Visualizer):
                 output = f"Reported: {hits}"
             else:
                 output = "Safe"
-
+            
             #color
             if hits >= 1:
                 icon = VisualizableIcon.MALWARE
                 color = VisualizableColor.DANGER
-
+                
             else:
                 icon = VisualizableIcon.LIKE
                 color = VisualizableColor.SUCCESS
@@ -466,7 +466,7 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or not hits,
             )
             return virustotal_report
-
+    
     @visualizable_error_handler_with_params("Tor Project")
     def _tor(self):
         try:
@@ -485,14 +485,14 @@ class IPReputationServices(Visualizer):
                 output = "Not Found"
 
             tor_report = self.Title(self.Base(
-                value="Tor Project",
-                link = link_tor
+                value="Tor Project",   
+                link = link_tor             
             ),
             self.Base(value=output),
             disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return tor_report
-
+    
     @visualizable_error_handler_with_params("Tor_Nodes_DanMeUk")
     def _tor_nodes_danmeuk(self):
         try:
@@ -526,9 +526,9 @@ class IPReputationServices(Visualizer):
                 self.Base(value=f"Tor Exit Address Found: {hits}"),
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
-
+            
             return tor_nodes_danmeuk_report
-
+    
     @visualizable_error_handler_with_params("ThreatFox")
     def _threatfox(self):
         try:
@@ -558,7 +558,7 @@ class IPReputationServices(Visualizer):
 
             )
             return threatfox_report
-
+    
     @visualizable_error_handler_with_params("Talos Reputation")
     def _talos(self):
         try:
@@ -581,7 +581,7 @@ class IPReputationServices(Visualizer):
             disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return talos_report
-
+    
     @visualizable_error_handler_with_params("Pulsedive")
     def _pulsedive(self):
         try:
@@ -605,7 +605,7 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return pulsedive_report
-
+    
     @visualizable_error_handler_with_params("Netlas")
     def _netlas(self):
         try:
@@ -618,8 +618,8 @@ class IPReputationServices(Visualizer):
             message = analyzer_report.status
             # ip = analyzer_report.report.get("ip", {})
             asn = analyzer_report.report.get("asn", {})
-
-
+            
+            
             if isinstance(asn, dict):
                 asn_name = asn.get("name", "")
                 asn_country = asn.get("country", "")
@@ -674,7 +674,7 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return ipqs_report
-
+    
     @visualizable_error_handler_with_params("InQuest_REPdb")
     def _inquest_repdb(self):
         try:
@@ -702,7 +702,7 @@ class IPReputationServices(Visualizer):
                 disable=disabled,
             )
             return inquest_rep_report
-
+    
     @visualizable_error_handler_with_params("InQuest_IOCdb")
     def _inquest_iocdb(self):
         try:
@@ -726,7 +726,7 @@ class IPReputationServices(Visualizer):
                 self.Base(value=f"Not Malicious: {found}"),
                 disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
-            return inquest_iocdb_report
+            return inquest_iocdb_report 
 
     @visualizable_error_handler_with_params("InQuest_DFI")
     def _InQuestDFI(self):
@@ -777,7 +777,7 @@ class IPReputationServices(Visualizer):
             else:  # should be "unknown"
                 icon = VisualizableIcon.WARNING
                 color = VisualizableColor.INFO
-
+            
             greynoisecom_report = self.Title(
                 self.Base(
                     value="Greynoise Community",
@@ -785,10 +785,10 @@ class IPReputationServices(Visualizer):
                     # icon=icon,
                 ),
                 self.Base(value=analyzer_report.report.get("classification", ""), color=color),
-                disable=disabled,
+                disable=disabled,   
             )
             return greynoisecom_report
-
+    
     @visualizable_error_handler_with_params("GoogleSafebrowsing")
     def _googlesafebrowsing(self):
         try:
@@ -798,7 +798,7 @@ class IPReputationServices(Visualizer):
         except AnalyzerReport.DoesNotExist:
             logger.warning("GoogleSafebrowsing report does not exist")
         else:
-            message = analyzer_report.status
+            message = analyzer_report.status 
             found = analyzer_report.report.get("Found", False)
             GoogleSafebrowsing_report = self.Title(
                 self.Base(
@@ -809,7 +809,7 @@ class IPReputationServices(Visualizer):
                 disable = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return GoogleSafebrowsing_report
-
+    
     @visualizable_error_handler_with_params("FireHol_IPList")
     def _firehol(self):
         try:
@@ -859,7 +859,7 @@ class IPReputationServices(Visualizer):
             # else:  # should be "unknown"
             #     icon = VisualizableIcon.SUCCESS
             #     color = VisualizableColor.INFO
-
+            
             # disabled = analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS"
 
             # hybrid_analyses_report = self.VList(
@@ -891,7 +891,7 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return hybrid_analyses_report
-
+    
     @visualizable_error_handler_with_params("ONYPHE")
     def _onyphe(self):
         try:
@@ -920,7 +920,7 @@ class IPReputationServices(Visualizer):
                 disable=analyzer_report.status != ReportStatus.SUCCESS or message != "SUCCESS",
             )
             return onyphe_report
-
+    
     @visualizable_error_handler_with_params("TweetFeed")
     def _tweetfeed(self):
         try:
