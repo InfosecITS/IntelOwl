@@ -973,56 +973,56 @@ class IPReputationServices(Visualizer):
         first_level_elements.append(abuse_categories_report)
 
         #second level elements
-        second_level_elements.append(self._feodotracker())
+        # second_level_elements.append(self._feodotracker())
 
-        second_level_elements.append(self._filescan_search())
+        # second_level_elements.append(self._filescan_search())
 
-        second_level_elements.append(self._x_force_exchange())
+        # second_level_elements.append(self._x_force_exchange())
 
-        second_level_elements.append(self._vt3())
+        # second_level_elements.append(self._vt3())
 
-        second_level_elements.append(self._binaryedge())
+        # second_level_elements.append(self._binaryedge())
 
         #Third Level Elements
-        third_level_elements.append(self._tor_nodes_danmeuk())
+        # third_level_elements.append(self._tor_nodes_danmeuk())
 
-        third_level_elements.append(self._tor())
+        # third_level_elements.append(self._tor())
 
-        third_level_elements.append(self._threatfox())
+        # third_level_elements.append(self._threatfox())
 
-        third_level_elements.append(self._talos())
+        # third_level_elements.append(self._talos())
 
-        third_level_elements.append(self._pulsedive())
+        # third_level_elements.append(self._pulsedive())
 
         #Fouth Level Elements
-        fourth_level_elements.append(self._otxquery())
+        # fourth_level_elements.append(self._otxquery())
 
-        fourth_level_elements.append(self._ipqs())
+        # fourth_level_elements.append(self._ipqs())
 
-        fourth_level_elements.append(self._inquest_repdb())
+        # fourth_level_elements.append(self._inquest_repdb())
 
-        fourth_level_elements.append(self._inquest_iocdb())
+        # fourth_level_elements.append(self._inquest_iocdb())
 
-        fourth_level_elements.append(self._InQuestDFI())
+        # fourth_level_elements.append(self._InQuestDFI())
 
         #Fifth Level Elements
-        fifth_level_elements.append(self._greynoisecom())
+        # fifth_level_elements.append(self._greynoisecom())
 
-        fifth_level_elements.append(self._googlesafebrowsing())
+        # fifth_level_elements.append(self._googlesafebrowsing())
 
-        fifth_level_elements.append(self._firehol())
+        # fifth_level_elements.append(self._firehol())
 
-        fifth_level_elements.append(self._hybrid_analysis())
+        # fifth_level_elements.append(self._hybrid_analysis())
 
-        fifth_level_elements.append(self._onyphe())
+        # fifth_level_elements.append(self._onyphe())
 
         #Sixth Level Elements
-        crowdsec_classification_report, crowdsec_behaviors_report = self._crowdsec()
-        sixth_level_elements.append(crowdsec_classification_report)
+        # crowdsec_classification_report, crowdsec_behaviors_report = self._crowdsec()
+        # sixth_level_elements.append(crowdsec_classification_report)
 
-        sixth_level_elements.append(crowdsec_behaviors_report)
+        # sixth_level_elements.append(crowdsec_behaviors_report)
 
-        sixth_level_elements.append(self._tweetfeed())
+        # sixth_level_elements.append(self._tweetfeed())
 
 
 
